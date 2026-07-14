@@ -1,6 +1,17 @@
-METEO VIVO — BUILD 18
+METEO VIVO — BUILD 19
 
-Correzione completa degli errori `primary` e `secondary` in ContentView.swift.
-Build tecnica 18, non mostrata nell'app.
+MODIFICHE
+- Eliminata la scritta “Sole in movimento”, “Pioggia animata”, ecc.
+- Le animazioni restano nello sfondo senza testi inutili.
+- Header semplificato: posizione personale, città, altre città e impostazioni.
+- Rimossa la stella dalla barra superiore.
+- Nome città su una sola riga, con riduzione automatica per nomi lunghi.
+- Paese e ora locale riuniti in una riga compatta.
+- Salvataggio città spostato sotto il meteo con un pulsante testuale discreto.
+- Build tecnica 19, non mostrata nell'app.
 
-Apri questa cartella nuova e fai Product > Clean Build Folder prima di compilare.
+PASSAGGI
+1. Elimina la cartella della build precedente.
+2. Apri questa build.
+3. Product > Clean Build Folder.
+4. Installa sull'iPhone e verifica l'header.

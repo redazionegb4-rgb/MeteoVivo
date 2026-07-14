@@ -230,50 +230,40 @@ struct ContentView: View {
 
     private func header(_ weather: CityWeather) -> some View {
         HStack(spacing: 12) {
-            HStack(spacing: 10) {
-                ZStack {
-                    Circle().fill(.ultraThinMaterial)
-                    Image(systemName: "location.fill")
-                        .font(.system(size: 15, weight: .bold))
-                }
-                .frame(width: 40, height: 40)
-
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(weather.city)
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
-                    Text(weather.country)
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(secondaryColor(for: weather))
-                    TimelineView(.periodic(from: .now, by: 30)) { _ in
-                        Text("Ora locale \(localTime(weather))")
-                            .font(.caption2.weight(.bold))
-                            .foregroundStyle(secondaryColor(for: weather))
-                    }
-                }
-            }
-            .foregroundStyle(primaryColor(for: weather))
-
-            Spacer()
-
             Button {
                 locationManager.requestPermissionAndLocation()
             } label: {
-                Image(systemName: "location.fill")
-                    .font(.system(size: 17, weight: .bold))
-                    .foregroundStyle(primaryColor(for: weather))
-                    .frame(width: 44, height: 44)
-                    .background(.ultraThinMaterial, in: Circle())
+                ZStack {
+                    Circle()
+                        .fill(.ultraThinMaterial)
+
+                    Image(systemName: "location.fill")
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundStyle(primaryColor(for: weather))
+                }
+                .frame(width: 46, height: 46)
             }
 
-            Button {
-                store.saveCurrentCity()
-            } label: {
-                Image(systemName: store.isSaved(latitude: weather.latitude, longitude: weather.longitude) ? "star.fill" : "star")
-                    .font(.system(size: 17, weight: .bold))
-                    .foregroundStyle(store.isSaved(latitude: weather.latitude, longitude: weather.longitude) ? Color.yellow : primaryColor(for: weather))
-                    .frame(width: 44, height: 44)
-                    .background(.ultraThinMaterial, in: Circle())
+            VStack(alignment: .leading, spacing: 2) {
+                Text(weather.city)
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .foregroundStyle(primaryColor(for: weather))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.72)
+                    .allowsTightening(true)
+
+                HStack(spacing: 7) {
+                    Text(weather.country)
+                    Text("•")
+                    TimelineView(.periodic(from: .now, by: 30)) { _ in
+                        Text(localTime(weather))
+                    }
+                }
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(secondaryColor(for: weather))
+                .lineLimit(1)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             Button { showCities = true } label: {
                 Image(systemName: "globe.europe.africa.fill")
@@ -310,10 +300,28 @@ struct ContentView: View {
                 }
             }
 
-            AnimatedWeatherBadge(
-                condition: weather.condition,
-                isDaytime: weather.isDaytime
-            )
+            Button {
+                store.saveCurrentCity()
+            } label: {
+                Label(
+                    store.isSaved(latitude: weather.latitude, longitude: weather.longitude)
+                        ? "Città salvata"
+                        : "Salva città",
+                    systemImage: store.isSaved(
+                        latitude: weather.latitude,
+                        longitude: weather.longitude
+                    ) ? "checkmark.circle.fill" : "star"
+                )
+                .font(.caption.bold())
+                .foregroundStyle(primaryColor(for: weather))
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(.ultraThinMaterial, in: Capsule())
+            }
+            .disabled(store.isSaved(
+                latitude: weather.latitude,
+                longitude: weather.longitude
+            ))
 
             Text(weather.summary)
                 .font(.subheadline.weight(.medium))
@@ -538,92 +546,3 @@ struct DetailTile: View {
 }
 
 
-private struct AnimatedWeatherBadge: View {
-    let condition: WeatherConditionKind
-    let isDaytime: Bool
-    @State private var animate = false
-
-    var body: some View {
-        ZStack {
-            Capsule()
-                .fill(Color.white.opacity(0.14))
-                .frame(height: 44)
-
-            HStack(spacing: 10) {
-                Image(systemName: condition.symbol(isDaytime: isDaytime))
-                    .symbolRenderingMode(.multicolor)
-                    .font(.system(size: 21, weight: .bold))
-                    .rotationEffect(.degrees(condition == .wind && animate ? 10 : 0))
-                    .offset(y: verticalOffset)
-
-                Text(animationText)
-                    .font(.caption.bold())
-                    .foregroundStyle(.white)
-            }
-
-            if condition == .rain || condition == .thunderstorm {
-                ForEach(0..<8, id: \.self) { index in
-                    Capsule()
-                        .fill(Color.cyan.opacity(0.75))
-                        .frame(width: 2, height: 10)
-                        .offset(
-                            x: CGFloat(index * 22 - 77),
-                            y: animate ? 17 : -17
-                        )
-                        .animation(
-                            .linear(duration: 0.9)
-                                .repeatForever(autoreverses: false)
-                                .delay(Double(index) * 0.08),
-                            value: animate
-                        )
-                }
-            }
-
-            if condition == .snow || condition == .sleet {
-                ForEach(0..<6, id: \.self) { index in
-                    Image(systemName: "snowflake")
-                        .font(.system(size: 8))
-                        .foregroundStyle(.white.opacity(0.85))
-                        .offset(
-                            x: CGFloat(index * 26 - 65),
-                            y: animate ? 16 : -16
-                        )
-                        .animation(
-                            .linear(duration: 1.8)
-                                .repeatForever(autoreverses: false)
-                                .delay(Double(index) * 0.12),
-                            value: animate
-                        )
-                }
-            }
-        }
-        .frame(maxWidth: 250)
-        .onAppear { animate = true }
-    }
-
-    private var verticalOffset: CGFloat {
-        switch condition {
-        case .clear, .partlyCloudy:
-            return animate ? -2 : 2
-        case .wind:
-            return 0
-        default:
-            return animate ? 2 : -2
-        }
-    }
-
-    private var animationText: String {
-        switch condition {
-        case .clear: return isDaytime ? "Sole in movimento" : "Cielo stellato"
-        case .partlyCloudy: return isDaytime ? "Nuvole leggere" : "Nuvole notturne"
-        case .cloudy: return "Nuvole in movimento"
-        case .rain: return "Pioggia animata"
-        case .thunderstorm: return "Temporale con lampi"
-        case .snow: return "Neve animata"
-        case .hail: return "Grandine animata"
-        case .sleet: return "Nevischio animato"
-        case .fog: return "Nebbia in movimento"
-        case .wind: return "Raffiche animate"
-        }
-    }
-}

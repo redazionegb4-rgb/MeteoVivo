@@ -147,7 +147,7 @@ struct CitiesView: View {
                 Text("Cerca e salva città")
                     .font(.title3.bold())
                     .foregroundStyle(.white)
-                Text("I risultati compaiono mentre scrivi. Tocca la stella per conservarli.")
+                Text("I risultati compaiono mentre scrivi. Apri una città e salvala dalla home.")
                     .font(.subheadline)
                     .foregroundStyle(.white.opacity(0.78))
             }
