@@ -336,61 +336,96 @@ private struct NightSkyAnimation: View {
 
     var body: some View {
         ZStack {
-            ForEach(0..<42, id: \.self) { index in
-                let x = CGFloat((index * 83) % 430) - 215
-                let y = CGFloat((index * 137) % 760) - 380
-                let size = CGFloat(2 + (index % 4))
-                let opacity = 0.28 + Double(index % 4) * 0.16
-
-                Circle()
-                    .fill(Color.white.opacity(opacity))
-                    .frame(width: size, height: size)
-                    .scaleEffect(animate ? 1.45 : 0.65)
-                    .opacity(animate ? 0.95 : 0.28)
-                    .offset(x: x, y: y)
-                    .animation(
-                        .easeInOut(duration: Double(1.7 + index % 5))
-                            .repeatForever(autoreverses: true)
-                            .delay(Double(index % 12) * 0.11),
-                        value: animate
-                    )
+            ForEach(0..<32, id: \.self) { index in
+                NightStar(index: index, animate: animate)
             }
 
-            Circle()
-                .fill(
-                    RadialGradient(
-                        colors: [
-                            Color.white.opacity(0.98),
-                            Color(red: 0.82, green: 0.88, blue: 1.0).opacity(0.75),
-                            Color.clear
-                        ],
-                        center: .center,
-                        startRadius: 5,
-                        endRadius: 85
-                    )
-                )
-                .frame(width: 150, height: 150)
-                .offset(x: 135, y: -270)
-                .scaleEffect(animate ? 1.04 : 0.96)
-                .animation(
-                    .easeInOut(duration: 4)
-                        .repeatForever(autoreverses: true),
-                    value: animate
-                )
+            MoonGlow(animate: animate)
 
             if cloudy {
-                LinearGradient(
-                    colors: [
-                        Color.white.opacity(0.03),
-                        Color.indigo.opacity(0.10),
-                        Color.clear
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
+                Color.indigo
+                    .opacity(0.08)
+                    .ignoresSafeArea()
             }
         }
+    }
+}
+
+private struct NightStar: View {
+    let index: Int
+    let animate: Bool
+
+    private var xPosition: CGFloat {
+        CGFloat((index * 83) % 430) - 215
+    }
+
+    private var yPosition: CGFloat {
+        CGFloat((index * 137) % 760) - 380
+    }
+
+    private var starSize: CGFloat {
+        CGFloat(2 + (index % 4))
+    }
+
+    private var starOpacity: Double {
+        0.28 + (Double(index % 4) * 0.16)
+    }
+
+    private var animationDuration: Double {
+        1.7 + Double(index % 5)
+    }
+
+    private var animationDelay: Double {
+        Double(index % 12) * 0.11
+    }
+
+    var body: some View {
+        Circle()
+            .fill(Color.white.opacity(starOpacity))
+            .frame(width: starSize, height: starSize)
+            .scaleEffect(animate ? 1.35 : 0.70)
+            .opacity(animate ? 0.92 : 0.30)
+            .offset(x: xPosition, y: yPosition)
+            .animation(starAnimation, value: animate)
+    }
+
+    private var starAnimation: Animation {
+        Animation
+            .easeInOut(duration: animationDuration)
+            .repeatForever(autoreverses: true)
+            .delay(animationDelay)
+    }
+}
+
+private struct MoonGlow: View {
+    let animate: Bool
+
+    var body: some View {
+        Circle()
+            .fill(moonGradient)
+            .frame(width: 150, height: 150)
+            .offset(x: 135, y: -270)
+            .scaleEffect(animate ? 1.04 : 0.96)
+            .animation(moonAnimation, value: animate)
+    }
+
+    private var moonGradient: RadialGradient {
+        RadialGradient(
+            colors: [
+                Color.white.opacity(0.98),
+                Color(red: 0.82, green: 0.88, blue: 1.0).opacity(0.75),
+                Color.clear
+            ],
+            center: .center,
+            startRadius: 5,
+            endRadius: 85
+        )
+    }
+
+    private var moonAnimation: Animation {
+        Animation
+            .easeInOut(duration: 4)
+            .repeatForever(autoreverses: true)
     }
 }
 
