@@ -19,15 +19,7 @@ struct ContentView: View {
         NavigationStack {
             ZStack {
                 if let weather = store.current {
-                    WeatherBackground(condition: weather.condition)
-                    if !weather.isDaytime {
-                        LinearGradient(
-                            colors: [Color.black.opacity(0.42), Color.indigo.opacity(0.30)],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                        .ignoresSafeArea()
-                    }
+                    WeatherBackground(condition: weather.condition, isDaytime: weather.isDaytime)
                     weatherContent(weather)
                 } else {
                     setupBackground
@@ -247,9 +239,11 @@ struct ContentView: View {
                     Text(weather.country)
                         .font(.caption.weight(.medium))
                         .foregroundStyle(secondary)
-                    Text("Ora locale \(localTime(weather))")
-                        .font(.caption2.weight(.bold))
-                        .foregroundStyle(secondary)
+                    TimelineView(.periodic(from: .now, by: 30)) { _ in
+                        Text("Ora locale \(localTime(weather))")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(secondary)
+                    }
                 }
             }
             .foregroundStyle(primary)

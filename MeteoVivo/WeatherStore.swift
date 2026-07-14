@@ -42,11 +42,18 @@ final class WeatherStore: ObservableObject {
         country: String,
         timeZoneIdentifier: String? = nil
     ) async {
+        let geocodedTimeZone = await resolveTimeZone(
+            latitude: latitude,
+            longitude: longitude
+        )
+
         let resolvedTimeZone: String
-        if let timeZoneIdentifier {
+        if geocodedTimeZone != TimeZone.current.identifier {
+            resolvedTimeZone = geocodedTimeZone
+        } else if let timeZoneIdentifier, !timeZoneIdentifier.isEmpty {
             resolvedTimeZone = timeZoneIdentifier
         } else {
-            resolvedTimeZone = await resolveTimeZone(latitude: latitude, longitude: longitude)
+            resolvedTimeZone = geocodedTimeZone
         }
         lastRequestedLocation = (latitude, longitude, city, country, resolvedTimeZone)
         isLoading = true
@@ -187,12 +194,23 @@ final class WeatherStore: ObservableObject {
 
     private func resolveTimeZone(latitude: Double, longitude: Double) async -> String {
         let location = CLLocation(latitude: latitude, longitude: longitude)
+        let geocoder = CLGeocoder()
+
         do {
-            let placemarks = try await CLGeocoder().reverseGeocodeLocation(location)
-            return placemarks.first?.timeZone?.identifier ?? TimeZone.current.identifier
+            let placemarks = try await geocoder.reverseGeocodeLocation(
+                location,
+                preferredLocale: Locale(identifier: "it_IT")
+            )
+
+            if let identifier = placemarks.first?.timeZone?.identifier,
+               !identifier.isEmpty {
+                return identifier
+            }
         } catch {
-            return TimeZone.current.identifier
+            // Il fallback viene gestito dal chiamante.
         }
+
+        return TimeZone.current.identifier
     }
 
     private static func localizedSummary(for condition: WeatherCondition) -> String {

@@ -1,8 +1,7 @@
 // !$*UTF8*$!
 {
 	archiveVersion = 1;
-	classes = {
-	};
+	classes = {};
 	objectVersion = 56;
 	objects = {
 
@@ -31,231 +30,55 @@
 		B00100000000000000000009 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		B00100000000000000000010 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B00100000000000000000011 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		B00100000000000000000012 /* MeteoVivo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; path = MeteoVivo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B00100000000000000000013 /* MeteoVivo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MeteoVivo.entitlements; sourceTree = "<group>"; };
+		B00100000000000000000012 /* MeteoVivo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; path = MeteoVivo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		C00100000000000000000001 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
+		C00100000000000000000001 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		D00100000000000000000001 = {
-			isa = PBXGroup;
-			children = (
-				D00100000000000000000002 /* MeteoVivo */,
-				D00100000000000000000003 /* Products */,
-			);
-			sourceTree = "<group>";
-		};
-		D00100000000000000000002 /* MeteoVivo */ = {
-			isa = PBXGroup;
-			children = (
-				B00100000000000000000001 /* MeteoVivoApp.swift */,
-				B00100000000000000000002 /* ContentView.swift */,
-				B00100000000000000000003 /* Models.swift */,
-				B00100000000000000000004 /* DemoWeather.swift */,
-				B00100000000000000000005 /* LocationManager.swift */,
-				B00100000000000000000006 /* WeatherStore.swift */,
-				B00100000000000000000007 /* WeatherBackground.swift */,
-				B00100000000000000000008 /* CitiesView.swift */,
-				B00100000000000000000009 /* SettingsView.swift */,
-				B00100000000000000000010 /* Assets.xcassets */,
-				B00100000000000000000011 /* Info.plist */,
-				B00100000000000000000013 /* MeteoVivo.entitlements */,
-			);
-			path = MeteoVivo;
-			sourceTree = "<group>";
-		};
-		D00100000000000000000003 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				B00100000000000000000012 /* MeteoVivo.app */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
+		D00100000000000000000001 = {isa = PBXGroup; children = (D00100000000000000000002 /* MeteoVivo */, D00100000000000000000003 /* Products */); sourceTree = "<group>"; };
+		D00100000000000000000002 /* MeteoVivo */ = {isa = PBXGroup; path = MeteoVivo; sourceTree = "<group>"; children = (
+			B00100000000000000000001, B00100000000000000000002, B00100000000000000000003, B00100000000000000000004,
+			B00100000000000000000005, B00100000000000000000006, B00100000000000000000007, B00100000000000000000008,
+			B00100000000000000000009, B00100000000000000000010, B00100000000000000000011, B00100000000000000000013
+		); };
+		D00100000000000000000003 /* Products */ = {isa = PBXGroup; children = (B00100000000000000000012); name = Products; sourceTree = "<group>"; };
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		E00100000000000000000001 /* MeteoVivo */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = F00100000000000000000002 /* Build configuration list for PBXNativeTarget "MeteoVivo" */;
-			buildPhases = (
-				C00100000000000000000002 /* Sources */,
-				C00100000000000000000001 /* Frameworks */,
-				C00100000000000000000003 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = MeteoVivo;
-			productName = MeteoVivo;
-			productReference = B00100000000000000000012 /* MeteoVivo.app */;
-			productType = "com.apple.product-type.application";
-		};
+		E00100000000000000000001 /* MeteoVivo */ = {isa = PBXNativeTarget; buildConfigurationList = F00100000000000000000002; buildPhases = (C00100000000000000000002, C00100000000000000000001, C00100000000000000000003); buildRules = (); dependencies = (); name = MeteoVivo; productName = MeteoVivo; productReference = B00100000000000000000012; productType = "com.apple.product-type.application"; };
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		E00100000000000000000002 /* Project object */ = {
-			isa = PBXProject;
-			attributes = {
-				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1500;
-				LastUpgradeCheck = 1500;
-				TargetAttributes = {
-					E00100000000000000000001 = {
-						CreatedOnToolsVersion = 15.0;
-					};
-				};
-			};
-			buildConfigurationList = F00100000000000000000001 /* Build configuration list for PBXProject "MeteoVivo" */;
-			compatibilityVersion = "Xcode 14.0";
-			developmentRegion = it;
-			hasScannedForEncodings = 0;
-			knownRegions = (
-				it,
-				Base,
-			);
-			mainGroup = D00100000000000000000001;
-			productRefGroup = D00100000000000000000003 /* Products */;
-			projectDirPath = "";
-			projectRoot = "";
-			targets = (
-				E00100000000000000000001 /* MeteoVivo */,
-			);
-		};
+		E00100000000000000000002 /* Project object */ = {isa = PBXProject; attributes = {BuildIndependentTargetsInParallel = 1; LastSwiftUpdateCheck = 1500; LastUpgradeCheck = 1500; TargetAttributes = {E00100000000000000000001 = {CreatedOnToolsVersion = 15.0; }; }; }; buildConfigurationList = F00100000000000000000001; compatibilityVersion = "Xcode 14.0"; developmentRegion = it; hasScannedForEncodings = 0; knownRegions = (it, Base); mainGroup = D00100000000000000000001; productRefGroup = D00100000000000000000003; projectDirPath = ""; projectRoot = ""; targets = (E00100000000000000000001); };
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		C00100000000000000000003 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				A00100000000000000000010 /* Assets.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
+		C00100000000000000000003 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (A00100000000000000000010); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		C00100000000000000000002 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				A00100000000000000000001 /* MeteoVivoApp.swift in Sources */,
-				A00100000000000000000002 /* ContentView.swift in Sources */,
-				A00100000000000000000003 /* Models.swift in Sources */,
-				A00100000000000000000004 /* DemoWeather.swift in Sources */,
-				A00100000000000000000005 /* LocationManager.swift in Sources */,
-				A00100000000000000000006 /* WeatherStore.swift in Sources */,
-				A00100000000000000000007 /* WeatherBackground.swift in Sources */,
-				A00100000000000000000008 /* CitiesView.swift in Sources */,
-				A00100000000000000000009 /* SettingsView.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
+		C00100000000000000000002 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (
+			A00100000000000000000001, A00100000000000000000002, A00100000000000000000003,
+			A00100000000000000000004, A00100000000000000000005, A00100000000000000000006,
+			A00100000000000000000007, A00100000000000000000008, A00100000000000000000009
+		); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		F00100000000000000000003 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ENABLE_MODULES = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				SDKROOT = iphoneos;
-				SWIFT_VERSION = 5.0;
-			};
-			name = Debug;
-		};
-		F00100000000000000000004 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ENABLE_MODULES = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				SDKROOT = iphoneos;
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_VERSION = 5.0;
-			};
-			name = Release;
-		};
-		F00100000000000000000005 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = MeteoVivo/MeteoVivo.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
-				DEVELOPMENT_TEAM = B8SC92LPR5;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = MeteoVivo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.dmb.meteovivo;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
-			};
-			name = Debug;
-		};
-		F00100000000000000000006 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = MeteoVivo/MeteoVivo.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
-				DEVELOPMENT_TEAM = B8SC92LPR5;
-				ENABLE_BITCODE = NO;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = MeteoVivo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.dmb.meteovivo;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
+		F00100000000000000000003 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; IPHONEOS_DEPLOYMENT_TARGET = 16.0; SDKROOT = iphoneos; SWIFT_VERSION = 5.0; }; name = Debug; };
+		F00100000000000000000004 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; IPHONEOS_DEPLOYMENT_TARGET = 16.0; SDKROOT = iphoneos; SWIFT_COMPILATION_MODE = wholemodule; SWIFT_VERSION = 5.0; }; name = Release; };
+		F00100000000000000000005 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; CODE_SIGN_ENTITLEMENTS = MeteoVivo/MeteoVivo.entitlements; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 14; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = MeteoVivo/Info.plist; IPHONEOS_DEPLOYMENT_TARGET = 16.0; MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = com.dmb.meteovivo; PRODUCT_NAME = "$(TARGET_NAME)"; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SUPPORTS_MACCATALYST = NO; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = 1; }; name = Debug; };
+		F00100000000000000000006 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; CODE_SIGN_ENTITLEMENTS = MeteoVivo/MeteoVivo.entitlements; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 14; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = MeteoVivo/Info.plist; IPHONEOS_DEPLOYMENT_TARGET = 16.0; MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = com.dmb.meteovivo; PRODUCT_NAME = "$(TARGET_NAME)"; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SUPPORTS_MACCATALYST = NO; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = 1; ENABLE_BITCODE = NO; VALIDATE_PRODUCT = YES; }; name = Release; };
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		F00100000000000000000001 /* Build configuration list for PBXProject "MeteoVivo" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				F00100000000000000000003 /* Debug */,
-				F00100000000000000000004 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		F00100000000000000000002 /* Build configuration list for PBXNativeTarget "MeteoVivo" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				F00100000000000000000005 /* Debug */,
-				F00100000000000000000006 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
+		F00100000000000000000001 /* Build configuration list for PBXProject */ = {isa = XCConfigurationList; buildConfigurations = (F00100000000000000000003, F00100000000000000000004); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		F00100000000000000000002 /* Build configuration list for PBXNativeTarget */ = {isa = XCConfigurationList; buildConfigurations = (F00100000000000000000005, F00100000000000000000006); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 /* End XCConfigurationList section */
 	};
-	rootObject = E00100000000000000000002 /* Project object */;
+	rootObject = E00100000000000000000002;
 }

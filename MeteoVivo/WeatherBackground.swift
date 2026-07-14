@@ -2,6 +2,7 @@ import SwiftUI
 
 struct WeatherBackground: View {
     let condition: WeatherConditionKind
+    let isDaytime: Bool
 
     @Environment(\.colorScheme) private var colorScheme
     @State private var animate = false
@@ -10,7 +11,7 @@ struct WeatherBackground: View {
     var body: some View {
         ZStack {
             LinearGradient(
-                colors: backgroundColors,
+                colors: sceneColors,
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -64,9 +65,20 @@ struct WeatherBackground: View {
     private var effectLayer: some View {
         switch condition {
         case .clear:
-            SunAnimation(animate: animate)
+            if isDaytime {
+                SunAnimation(animate: animate)
+            } else {
+                NightSkyAnimation(animate: animate, cloudy: false)
+            }
         case .partlyCloudy:
-            CloudAnimation(animate: animate, showSun: true)
+            if isDaytime {
+                CloudAnimation(animate: animate, showSun: true)
+            } else {
+                ZStack {
+                    NightSkyAnimation(animate: animate, cloudy: true)
+                    CloudAnimation(animate: animate, showSun: false)
+                }
+            }
         case .cloudy:
             CloudAnimation(animate: animate, showSun: false)
         case .rain:
@@ -84,6 +96,30 @@ struct WeatherBackground: View {
         case .wind:
             WindAnimation(animate: animate)
         }
+    }
+
+    private var sceneColors: [Color] {
+        if !isDaytime {
+            switch condition {
+            case .rain, .thunderstorm:
+                return [
+                    Color(red: 0.015, green: 0.04, blue: 0.10),
+                    Color(red: 0.08, green: 0.14, blue: 0.24)
+                ]
+            case .snow, .sleet, .hail:
+                return [
+                    Color(red: 0.03, green: 0.08, blue: 0.16),
+                    Color(red: 0.15, green: 0.25, blue: 0.38)
+                ]
+            default:
+                return [
+                    Color(red: 0.015, green: 0.025, blue: 0.10),
+                    Color(red: 0.08, green: 0.10, blue: 0.28)
+                ]
+            }
+        }
+
+        return backgroundColors
     }
 
     private var accentColor: Color {
@@ -290,6 +326,71 @@ private struct CloudAnimation: View {
         }
         .foregroundStyle(Color.white.opacity(opacity))
         .scaleEffect(scale)
+    }
+}
+
+
+private struct NightSkyAnimation: View {
+    let animate: Bool
+    let cloudy: Bool
+
+    var body: some View {
+        ZStack {
+            ForEach(0..<42, id: \.self) { index in
+                let x = CGFloat((index * 83) % 430) - 215
+                let y = CGFloat((index * 137) % 760) - 380
+                let size = CGFloat(2 + (index % 4))
+                let opacity = 0.28 + Double(index % 4) * 0.16
+
+                Circle()
+                    .fill(Color.white.opacity(opacity))
+                    .frame(width: size, height: size)
+                    .scaleEffect(animate ? 1.45 : 0.65)
+                    .opacity(animate ? 0.95 : 0.28)
+                    .offset(x: x, y: y)
+                    .animation(
+                        .easeInOut(duration: Double(1.7 + index % 5))
+                            .repeatForever(autoreverses: true)
+                            .delay(Double(index % 12) * 0.11),
+                        value: animate
+                    )
+            }
+
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            Color.white.opacity(0.98),
+                            Color(red: 0.82, green: 0.88, blue: 1.0).opacity(0.75),
+                            Color.clear
+                        ],
+                        center: .center,
+                        startRadius: 5,
+                        endRadius: 85
+                    )
+                )
+                .frame(width: 150, height: 150)
+                .offset(x: 135, y: -270)
+                .scaleEffect(animate ? 1.04 : 0.96)
+                .animation(
+                    .easeInOut(duration: 4)
+                        .repeatForever(autoreverses: true),
+                    value: animate
+                )
+
+            if cloudy {
+                LinearGradient(
+                    colors: [
+                        Color.white.opacity(0.03),
+                        Color.indigo.opacity(0.10),
+                        Color.clear
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
+            }
+        }
     }
 }
 

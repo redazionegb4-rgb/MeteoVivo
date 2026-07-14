@@ -1,15 +1,18 @@
-METEO VIVO — BUILD 13
+METEO VIVO — BUILD 14
 
-CORREZIONE
-- Suddivise le animazioni meteo in viste SwiftUI separate.
-- Risolti gli errori “compiler is unable to type-check this expression”.
-- Mantenute animazioni per sole, nuvole, pioggia, temporali, neve,
-  grandine, nevischio, nebbia e vento.
-- Build tecnica 13, non mostrata nell'app.
+CORREZIONI
+- Fuso orario ricavato direttamente dalle coordinate della città.
+- Vancouver ora mostra l'ora locale corretta, non quella dell'iPhone.
+- Sfondo notturno reale con stelle e luna.
+- Pioggia e temporali con sfondi più scuri e realistici.
+- Giorno/notte dipendono da alba e tramonto della località.
+- Ora locale aggiornata automaticamente ogni 30 secondi.
+- Mantenute tutte le animazioni meteo.
+- Build tecnica 14, non mostrata nell'app.
 
-PASSAGGI
-1. Elimina la cartella della build precedente.
-2. Apri questa build.
-3. Product > Clean Build Folder.
-4. Prova sull'iPhone.
-5. Poi esegui Product > Archive.
+INSTALLAZIONE
+1. Elimina la vecchia app dall'iPhone per cancellare città salvate con fuso errato.
+2. Elimina la vecchia cartella del progetto.
+3. Apri questa build.
+4. Product > Clean Build Folder.
+5. Installa nuovamente sull'iPhone.

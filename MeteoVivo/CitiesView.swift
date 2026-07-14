@@ -57,7 +57,7 @@ final class CityLiveSearch: NSObject, ObservableObject, MKLocalSearchCompleterDe
             let subtitle = [placemark.administrativeArea, placemark.country]
                 .compactMap { $0 }
                 .joined(separator: ", ")
-            let timeZone = placemark.timeZone?.identifier ?? TimeZone.current.identifier
+            let timeZone = placemark.timeZone?.identifier ?? ""
 
             return CityCandidate(
                 name: name,
