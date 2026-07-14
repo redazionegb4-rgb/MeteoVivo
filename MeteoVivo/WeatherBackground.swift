@@ -66,7 +66,8 @@ struct WeatherBackground: View {
         case .cloudy, .fog: return Color(red: 0.78, green: 0.86, blue: 0.95)
         case .rain: return Color(red: 0.15, green: 0.75, blue: 1)
         case .thunderstorm: return Color(red: 0.75, green: 0.35, blue: 1)
-        case .snow: return .white
+        case .snow, .sleet: return .white
+        case .hail: return .cyan
         case .wind: return .mint
         }
     }
@@ -79,7 +80,8 @@ struct WeatherBackground: View {
             case .cloudy, .fog: return [Color(red: 0.08, green: 0.12, blue: 0.20), Color(red: 0.28, green: 0.35, blue: 0.47)]
             case .rain: return [Color(red: 0.03, green: 0.11, blue: 0.24), Color(red: 0.08, green: 0.31, blue: 0.49)]
             case .thunderstorm: return [Color(red: 0.08, green: 0.03, blue: 0.18), Color(red: 0.30, green: 0.12, blue: 0.44)]
-            case .snow: return [Color(red: 0.13, green: 0.28, blue: 0.43), Color(red: 0.43, green: 0.60, blue: 0.72)]
+            case .snow, .sleet: return [Color(red: 0.13, green: 0.28, blue: 0.43), Color(red: 0.43, green: 0.60, blue: 0.72)]
+            case .hail: return [Color(red: 0.08, green: 0.26, blue: 0.42), Color(red: 0.30, green: 0.62, blue: 0.78)]
             case .wind: return [Color(red: 0.02, green: 0.23, blue: 0.28), Color(red: 0.14, green: 0.49, blue: 0.45)]
             }
         } else {
@@ -89,7 +91,8 @@ struct WeatherBackground: View {
             case .cloudy, .fog: return [Color(red: 0.69, green: 0.80, blue: 0.91), Color(red: 0.48, green: 0.62, blue: 0.78)]
             case .rain: return [Color(red: 0.35, green: 0.72, blue: 0.93), Color(red: 0.35, green: 0.51, blue: 0.72)]
             case .thunderstorm: return [Color(red: 0.47, green: 0.43, blue: 0.78), Color(red: 0.28, green: 0.32, blue: 0.58)]
-            case .snow: return [Color(red: 0.70, green: 0.89, blue: 1.0), Color(red: 0.59, green: 0.75, blue: 0.90)]
+            case .snow, .sleet: return [Color(red: 0.70, green: 0.89, blue: 1.0), Color(red: 0.59, green: 0.75, blue: 0.90)]
+            case .hail: return [Color(red: 0.58, green: 0.83, blue: 0.95), Color(red: 0.39, green: 0.66, blue: 0.82)]
             case .wind: return [Color(red: 0.37, green: 0.88, blue: 0.77), Color(red: 0.40, green: 0.70, blue: 0.85)]
             }
         }

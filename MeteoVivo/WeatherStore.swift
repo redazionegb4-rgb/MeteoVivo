@@ -42,7 +42,12 @@ final class WeatherStore: ObservableObject {
         country: String,
         timeZoneIdentifier: String? = nil
     ) async {
-        let resolvedTimeZone = timeZoneIdentifier ?? await resolveTimeZone(latitude: latitude, longitude: longitude)
+        let resolvedTimeZone: String
+        if let timeZoneIdentifier {
+            resolvedTimeZone = timeZoneIdentifier
+        } else {
+            resolvedTimeZone = await resolveTimeZone(latitude: latitude, longitude: longitude)
+        }
         lastRequestedLocation = (latitude, longitude, city, country, resolvedTimeZone)
         isLoading = true
         errorMessage = nil

@@ -1,17 +1,13 @@
-METEO VIVO — BUILD 8
+METEO VIVO — BUILD 9
 
-CORREZIONI PRINCIPALI
-- Mappatura completa e corretta delle condizioni WeatherKit: pioggia, temporali, neve, nebbia, vento, grandine e nevischio.
-- Risultati città live mentre si scrive tramite MapKit.
-- Eliminata la sezione delle città popolari.
-- Città salvabili con la stella e conservate anche dopo la chiusura dell’app.
-- Ora locale mostrata per ogni città.
-- Grafica giorno/notte automatica in base ad alba e tramonto.
-- Icone orarie adattate a giorno e notte.
-- Nuova icona premium con simbolo Meteo Vivo.
-- Build tecnica 8, non mostrata nell’app.
+Correzioni compilazione Xcode 15:
+- Sistemati tutti gli switch non esaustivi per grandine e nevischio.
+- Sistemato l'uso di await nella risoluzione del fuso orario.
+- Aggiunto il parametro timeZoneIdentifier ai dati demo interni.
+- Build tecnica 9, non mostrata nell'app.
 
-INSTALLAZIONE
-1. Elimina la vecchia app dall’iPhone.
-2. Product > Clean Build Folder.
-3. Installa questa build.
+Prima di installare:
+1. Elimina la cartella della build precedente.
+2. Apri questa nuova build.
+3. Product > Clean Build Folder.
+4. Product > Archive.
