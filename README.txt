@@ -1,11 +1,21 @@
-METEO VIVO — BUILD 10
+METEO VIVO — BUILD 12
 
-Correzione:
-- Aggiunto definitivamente il parametro timeZoneIdentifier a DemoWeather.swift.
-- Build tecnica 10, non mostrata nell'app.
+ANIMAZIONI METEO
+- Sole: bagliore pulsante, raggi rotanti e scintille.
+- Nuvole: livelli di nuvole in movimento.
+- Pioggia: gocce animate continue.
+- Temporale: pioggia, lampi e fulmine.
+- Neve: fiocchi con movimento e rotazione.
+- Grandine: chicchi animati.
+- Nevischio: pioggia e neve combinate.
+- Nebbia: banchi di foschia in movimento.
+- Vento: raffiche animate e foglie.
+- Grafica compatibile con modalità chiara e scura.
+- Build tecnica 12, non mostrata nell'app.
 
-Passaggi:
-1. Elimina la cartella della build precedente.
-2. Apri questa nuova build.
+INSTALLAZIONE
+1. Elimina la vecchia cartella del progetto.
+2. Apri questa build.
 3. Product > Clean Build Folder.
-4. Product > Archive.
+4. Avvia prima sull'iPhone per controllare le animazioni.
+5. Poi esegui Product > Archive.
