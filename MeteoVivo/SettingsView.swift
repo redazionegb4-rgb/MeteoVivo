@@ -16,8 +16,8 @@ struct SettingsView: View {
                 }
 
                 Section("Dati meteo") {
-                    LabeledContent("Fonte", value: store.useLiveWeather ? "Apple WeatherKit" : "Dati dimostrativi")
-                    Text("Dopo aver attivato WeatherKit nell’account Apple Developer e in Signing & Capabilities, l’app utilizzerà automaticamente i dati reali.")
+                    LabeledContent("Fonte", value: store.hasLoadedRealData ? "Apple WeatherKit" : "Non disponibili")
+                    Text("L’app utilizza esclusivamente dati meteo reali tramite Apple WeatherKit. WeatherKit deve essere attivo nell’App ID e nelle capability del progetto.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }

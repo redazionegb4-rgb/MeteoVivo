@@ -1,20 +1,14 @@
-METEO VIVO — BUILD 1
-Compatibilità: Xcode 15 / iOS 16+
+METEO VIVO — BUILD 5
 
-APERTURA
-1. Apri MeteoVivo.xcodeproj.
-2. Seleziona il target MeteoVivo > Signing & Capabilities.
-3. Scegli il tuo Team Apple Developer.
-4. Cambia il Bundle Identifier se necessario.
+Questa build usa dati reali Apple WeatherKit e non usa più dati dimostrativi.
 
-WEATHERKIT
-1. Crea/aggiorna lo stesso App ID nel portale Apple Developer.
-2. Abilita WeatherKit nell'App ID.
-3. In Xcode premi + Capability e aggiungi WeatherKit.
-4. Prova su iPhone reale.
+PRIMA DI AVVIARLA:
+1. Apple Developer > Identifiers > com.dmb.meteovivo > attiva WeatherKit.
+2. In Xcode apri il target MeteoVivo > Signing & Capabilities.
+3. Seleziona il tuo Team.
+4. Verifica che compaia la capability WeatherKit.
+5. Esegui sul tuo iPhone reale.
 
-SENZA WEATHERKIT
-L'app si apre comunque con dati dimostrativi e permette di provare grafica, città, ricerca, posizione e preferiti.
-
-NOTA ICONA
-È presente lo spazio AppIcon ma non ancora l'icona definitiva. La aggiungeremo dopo aver scelto il logo.
+Compatibilità: Xcode 15, iOS 16 o successivo.
+Versione app: 1.0
+Build tecnica: 5 (non mostrata nell’app).

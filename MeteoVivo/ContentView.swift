@@ -38,7 +38,38 @@ struct ContentView: View {
                 if locationManager.authorizationStatus == .authorizedWhenInUse ||
                     locationManager.authorizationStatus == .authorizedAlways {
                     locationManager.requestPermissionAndLocation()
+                } else if locationManager.authorizationStatus == .notDetermined {
+                    locationManager.requestPermissionAndLocation()
+                } else {
+                    await store.loadWeather(latitude: 41.9028, longitude: 12.4964, city: "Roma", country: "Italia")
                 }
+            }
+            .overlay {
+                if store.isLoading {
+                    ZStack {
+                        Color.black.opacity(0.12).ignoresSafeArea()
+                        VStack(spacing: 14) {
+                            ProgressView()
+                                .scaleEffect(1.2)
+                            Text("Aggiornamento meteo…")
+                                .font(.subheadline.bold())
+                        }
+                        .padding(.horizontal, 28)
+                        .padding(.vertical, 22)
+                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+                    }
+                }
+            }
+            .alert("Dati meteo non disponibili", isPresented: Binding(
+                get: { store.errorMessage != nil },
+                set: { if !$0 { store.errorMessage = nil } }
+            )) {
+                Button("Riprova") {
+                    Task { await refreshCurrent() }
+                }
+                Button("OK", role: .cancel) { store.errorMessage = nil }
+            } message: {
+                Text(store.errorMessage ?? "")
             }
             .onChange(of: locationManager.location) { location in
                 guard let location else { return }
@@ -223,16 +254,11 @@ struct ContentView: View {
 
     private var updateFooter: some View {
         VStack(spacing: 5) {
-            Text(store.useLiveWeather ? "Dati Apple WeatherKit" : "Modalità dimostrativa")
+            Text(store.hasLoadedRealData ? "Dati meteo reali · Apple Weather" : "In attesa dei dati reali")
                 .font(.caption.weight(.bold))
             Text("Aggiornato alle \(store.current.lastUpdated.formatted(date: .omitted, time: .shortened))")
                 .font(.caption2)
-            if let message = store.errorMessage {
-                Text(message)
-                    .font(.caption2)
-                    .multilineTextAlignment(.center)
-                    .padding(.top, 3)
-            }
+            
         }
         .foregroundStyle(secondary)
         .padding(.top, 2)
