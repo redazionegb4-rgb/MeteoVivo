@@ -7,12 +7,17 @@ struct ContentView: View {
     @State private var showCities = false
     @State private var showSettings = false
 
-    private var primary: Color {
-        colorScheme == .dark ? .white : Color(red: 0.04, green: 0.10, blue: 0.20)
+    private func primaryColor(for weather: CityWeather) -> Color {
+        if !weather.isDaytime {
+            return .white
+        }
+        return colorScheme == .dark
+            ? .white
+            : Color(red: 0.04, green: 0.10, blue: 0.20)
     }
 
-    private var secondary: Color {
-        primary.opacity(0.66)
+    private func secondaryColor(for weather: CityWeather) -> Color {
+        primaryColor(for: weather).opacity(0.72)
     }
 
     var body: some View {
@@ -238,17 +243,27 @@ struct ContentView: View {
                         .font(.system(size: 18, weight: .bold, design: .rounded))
                     Text(weather.country)
                         .font(.caption.weight(.medium))
-                        .foregroundStyle(secondary)
+                        .foregroundStyle(secondaryColor(for: weather))
                     TimelineView(.periodic(from: .now, by: 30)) { _ in
                         Text("Ora locale \(localTime(weather))")
                             .font(.caption2.weight(.bold))
-                            .foregroundStyle(secondary)
+                            .foregroundStyle(secondaryColor(for: weather))
                     }
                 }
             }
-            .foregroundStyle(primary)
+            .foregroundStyle(primaryColor(for: weather))
 
             Spacer()
+
+            Button {
+                locationManager.requestPermissionAndLocation()
+            } label: {
+                Image(systemName: "location.fill")
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundStyle(primaryColor(for: weather))
+                    .frame(width: 44, height: 44)
+                    .background(.ultraThinMaterial, in: Circle())
+            }
 
             Button {
                 store.saveCurrentCity()
@@ -263,7 +278,7 @@ struct ContentView: View {
             Button { showCities = true } label: {
                 Image(systemName: "globe.europe.africa.fill")
                     .font(.system(size: 17, weight: .bold))
-                    .foregroundStyle(primary)
+                    .foregroundStyle(primaryColor(for: weather))
                     .frame(width: 44, height: 44)
                     .background(.ultraThinMaterial, in: Circle())
             }
@@ -271,7 +286,7 @@ struct ContentView: View {
             Button { showSettings = true } label: {
                 Image(systemName: "slider.horizontal.3")
                     .font(.system(size: 17, weight: .bold))
-                    .foregroundStyle(primary)
+                    .foregroundStyle(primaryColor(for: weather))
                     .frame(width: 44, height: 44)
                     .background(.ultraThinMaterial, in: Circle())
             }
@@ -295,10 +310,15 @@ struct ContentView: View {
                 }
             }
 
+            AnimatedWeatherBadge(
+                condition: weather.condition,
+                isDaytime: weather.isDaytime
+            )
+
             Text(weather.summary)
                 .font(.subheadline.weight(.medium))
                 .multilineTextAlignment(.center)
-                .foregroundStyle(secondary)
+                .foregroundStyle(secondaryColor(for: weather))
 
             HStack(spacing: 8) {
                 Label("Percepita \(Int(weather.apparentTemperature.rounded()))°", systemImage: "thermometer.medium")
@@ -308,12 +328,12 @@ struct ContentView: View {
                 }
             }
             .font(.caption.weight(.bold))
-            .foregroundStyle(primary)
+            .foregroundStyle(primaryColor(for: weather))
             .padding(.horizontal, 13)
             .padding(.vertical, 9)
             .background(.ultraThinMaterial, in: Capsule())
         }
-        .foregroundStyle(primary)
+        .foregroundStyle(primaryColor(for: weather))
         .padding(.vertical, 8)
     }
 
@@ -378,13 +398,13 @@ struct ContentView: View {
 
                         Spacer()
 
-                        Text("\(Int(item.low))°").foregroundStyle(secondary)
+                        Text("\(Int(item.low))°").foregroundStyle(secondaryColor(for: weather))
                         Capsule()
                             .fill(LinearGradient(colors: [.cyan, .yellow, .orange], startPoint: .leading, endPoint: .trailing))
                             .frame(width: 48, height: 5)
                         Text("\(Int(item.high))°").fontWeight(.bold)
                     }
-                    .foregroundStyle(primary)
+                    .foregroundStyle(primaryColor(for: weather))
                     .padding(.vertical, 12)
 
                     if index < weather.daily.count - 1 {
@@ -402,7 +422,7 @@ struct ContentView: View {
             Text("Aggiornato alle \(weather.lastUpdated.formatted(date: .omitted, time: .shortened))")
                 .font(.caption2)
         }
-        .foregroundStyle(secondary)
+        .foregroundStyle(secondaryColor(for: weather))
         .padding(.top, 2)
     }
 
@@ -445,6 +465,7 @@ struct ContentView: View {
 }
 
 struct WeatherCard<Content: View>: View {
+    @Environment(\.colorScheme) private var colorScheme
     let title: String
     let symbol: String
     @ViewBuilder let content: Content
@@ -457,16 +478,24 @@ struct WeatherCard<Content: View>: View {
             content
         }
         .padding(16)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 27, style: .continuous))
+        .background(
+            Color.black.opacity(0.16),
+            in: RoundedRectangle(cornerRadius: 27, style: .continuous)
+        )
+        .background(
+            .ultraThinMaterial,
+            in: RoundedRectangle(cornerRadius: 27, style: .continuous)
+        )
         .overlay(
             RoundedRectangle(cornerRadius: 27, style: .continuous)
-                .stroke(Color.white.opacity(0.38), lineWidth: 1)
+                .stroke(Color.white.opacity(0.46), lineWidth: 1)
         )
         .shadow(color: Color.black.opacity(0.09), radius: 18, y: 10)
     }
 }
 
 struct DetailTile: View {
+    @Environment(\.colorScheme) private var colorScheme
     let title: String
     let value: String
     let symbol: String
@@ -492,11 +521,109 @@ struct DetailTile: View {
         }
         .frame(maxWidth: .infinity, minHeight: 122, alignment: .topLeading)
         .padding(15)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .background(
+            Color.black.opacity(0.14),
+            in: RoundedRectangle(cornerRadius: 24, style: .continuous)
+        )
+        .background(
+            .ultraThinMaterial,
+            in: RoundedRectangle(cornerRadius: 24, style: .continuous)
+        )
         .overlay(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(Color.white.opacity(0.34), lineWidth: 1)
+                .stroke(Color.white.opacity(0.42), lineWidth: 1)
         )
         .shadow(color: Color.black.opacity(0.08), radius: 15, y: 8)
+    }
+}
+
+
+private struct AnimatedWeatherBadge: View {
+    let condition: WeatherConditionKind
+    let isDaytime: Bool
+    @State private var animate = false
+
+    var body: some View {
+        ZStack {
+            Capsule()
+                .fill(Color.white.opacity(0.14))
+                .frame(height: 44)
+
+            HStack(spacing: 10) {
+                Image(systemName: condition.symbol(isDaytime: isDaytime))
+                    .symbolRenderingMode(.multicolor)
+                    .font(.system(size: 21, weight: .bold))
+                    .rotationEffect(.degrees(condition == .wind && animate ? 10 : 0))
+                    .offset(y: verticalOffset)
+
+                Text(animationText)
+                    .font(.caption.bold())
+                    .foregroundStyle(.white)
+            }
+
+            if condition == .rain || condition == .thunderstorm {
+                ForEach(0..<8, id: \.self) { index in
+                    Capsule()
+                        .fill(Color.cyan.opacity(0.75))
+                        .frame(width: 2, height: 10)
+                        .offset(
+                            x: CGFloat(index * 22 - 77),
+                            y: animate ? 17 : -17
+                        )
+                        .animation(
+                            .linear(duration: 0.9)
+                                .repeatForever(autoreverses: false)
+                                .delay(Double(index) * 0.08),
+                            value: animate
+                        )
+                }
+            }
+
+            if condition == .snow || condition == .sleet {
+                ForEach(0..<6, id: \.self) { index in
+                    Image(systemName: "snowflake")
+                        .font(.system(size: 8))
+                        .foregroundStyle(.white.opacity(0.85))
+                        .offset(
+                            x: CGFloat(index * 26 - 65),
+                            y: animate ? 16 : -16
+                        )
+                        .animation(
+                            .linear(duration: 1.8)
+                                .repeatForever(autoreverses: false)
+                                .delay(Double(index) * 0.12),
+                            value: animate
+                        )
+                }
+            }
+        }
+        .frame(maxWidth: 250)
+        .onAppear { animate = true }
+    }
+
+    private var verticalOffset: CGFloat {
+        switch condition {
+        case .clear, .partlyCloudy:
+            return animate ? -2 : 2
+        case .wind:
+            return 0
+        default:
+            return animate ? 2 : -2
+        }
+    }
+
+    private var animationText: String {
+        switch condition {
+        case .clear: return isDaytime ? "Sole in movimento" : "Cielo stellato"
+        case .partlyCloudy: return isDaytime ? "Nuvole leggere" : "Nuvole notturne"
+        case .cloudy: return "Nuvole in movimento"
+        case .rain: return "Pioggia animata"
+        case .thunderstorm: return "Temporale con lampi"
+        case .snow: return "Neve animata"
+        case .hail: return "Grandine animata"
+        case .sleet: return "Nevischio animato"
+        case .fog: return "Nebbia in movimento"
+        case .wind: return "Raffiche animate"
+        }
     }
 }

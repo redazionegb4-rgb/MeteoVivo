@@ -454,7 +454,7 @@ private struct RainDrop: View {
         let delay = Double(index % 10) * 0.10
 
         Capsule()
-            .fill(Color.white.opacity(0.34))
+            .fill(Color.white.opacity(0.54))
             .frame(width: 2.5, height: height)
             .rotationEffect(.degrees(12))
             .offset(x: x, y: animate ? 760 : -240)
@@ -514,7 +514,7 @@ private struct SnowFlake: View {
 
         Image(systemName: "snowflake")
             .font(.system(size: size))
-            .foregroundStyle(Color.white.opacity(0.66))
+            .foregroundStyle(Color.white.opacity(0.82))
             .rotationEffect(.degrees(animate ? 240 : 0))
             .offset(x: x, y: animate ? 760 : -240)
             .animation(
@@ -551,7 +551,7 @@ private struct HailStone: View {
         let delay = Double(index % 9) * 0.12
 
         Circle()
-            .fill(Color.white.opacity(0.90))
+            .fill(Color.white.opacity(0.96))
             .frame(width: size, height: size)
             .shadow(color: Color.cyan.opacity(0.45), radius: 3)
             .offset(x: x, y: animate ? 770 : -240)
@@ -602,7 +602,7 @@ private struct FogBand: View {
         let endX = CGFloat(135 - index * 10)
 
         Capsule()
-            .fill(Color.white.opacity(0.20))
+            .fill(Color.white.opacity(0.34))
             .frame(width: width, height: height)
             .blur(radius: 8)
             .offset(x: animate ? endX : startX, y: y)
@@ -637,7 +637,7 @@ private struct WindLine: View {
         let delay = Double(index) * 0.12
 
         Capsule()
-            .fill(Color.white.opacity(0.24))
+            .fill(Color.white.opacity(0.40))
             .frame(width: width, height: 4)
             .offset(x: animate ? 330 : -330, y: y)
             .animation(
