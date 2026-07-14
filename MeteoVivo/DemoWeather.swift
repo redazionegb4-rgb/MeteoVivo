@@ -26,6 +26,7 @@ extension CityWeather {
         }
         return CityWeather(
             id: UUID(), city: city, country: country, latitude: latitude, longitude: longitude,
+            timeZoneIdentifier: "Europe/Rome",
             temperature: 29, apparentTemperature: 31, condition: .clear,
             summary: "Cielo sereno per gran parte della giornata.", humidity: 0.48,
             windSpeed: 11, uvIndex: 7, pressure: 1015, visibility: 18,
