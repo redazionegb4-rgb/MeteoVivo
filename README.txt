@@ -1,16 +1,17 @@
-METEO VIVO — BUILD 7
+METEO VIVO — BUILD 8
 
-Correzioni:
-- La posizione attuale resta fissa nella home e non apre più la pagina città.
-- Aggiunto un pulsante separato con il globo per scegliere altre città.
-- Pagina città completamente ridisegnata.
-- Pagina impostazioni completamente ridisegnata.
-- Previsioni orarie filtrate dall’ora attuale per le successive 24 ore.
-- Orario forzato nel formato italiano 24 ore HH:mm.
-- Nuova icona premium, colorata e senza nuvole.
-- Build tecnica 7, non mostrata nell’app.
+CORREZIONI PRINCIPALI
+- Mappatura completa e corretta delle condizioni WeatherKit: pioggia, temporali, neve, nebbia, vento, grandine e nevischio.
+- Risultati città live mentre si scrive tramite MapKit.
+- Eliminata la sezione delle città popolari.
+- Città salvabili con la stella e conservate anche dopo la chiusura dell’app.
+- Ora locale mostrata per ogni città.
+- Grafica giorno/notte automatica in base ad alba e tramonto.
+- Icone orarie adattate a giorno e notte.
+- Nuova icona premium con simbolo Meteo Vivo.
+- Build tecnica 8, non mostrata nell’app.
 
-Prima di installare:
+INSTALLAZIONE
 1. Elimina la vecchia app dall’iPhone.
 2. Product > Clean Build Folder.
-3. Installa la nuova build.
+3. Installa questa build.

@@ -6,12 +6,18 @@ import WeatherKit
 @MainActor
 final class WeatherStore: ObservableObject {
     @Published var current: CityWeather?
-    @Published var favorites: [CityWeather] = []
+    @Published var savedCities: [SavedCity] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var hasLoadedRealData = false
-    @Published var lastRequestedLocation: (latitude: Double, longitude: Double, city: String, country: String)?
+    @Published var lastRequestedLocation: (latitude: Double, longitude: Double, city: String, country: String, timeZoneIdentifier: String)?
+
     @AppStorage("appTheme") private var appThemeRaw = AppTheme.automatic.rawValue
+    private let savedCitiesKey = "savedCitiesV2"
+
+    init() {
+        loadSavedCities()
+    }
 
     var theme: AppTheme {
         get { AppTheme(rawValue: appThemeRaw) ?? .automatic }
@@ -29,8 +35,15 @@ final class WeatherStore: ObservableObject {
         }
     }
 
-    func loadWeather(latitude: Double, longitude: Double, city: String, country: String) async {
-        lastRequestedLocation = (latitude, longitude, city, country)
+    func loadWeather(
+        latitude: Double,
+        longitude: Double,
+        city: String,
+        country: String,
+        timeZoneIdentifier: String? = nil
+    ) async {
+        let resolvedTimeZone = timeZoneIdentifier ?? await resolveTimeZone(latitude: latitude, longitude: longitude)
+        lastRequestedLocation = (latitude, longitude, city, country, resolvedTimeZone)
         isLoading = true
         errorMessage = nil
         defer { isLoading = false }
@@ -40,12 +53,8 @@ final class WeatherStore: ObservableObject {
             let weather = try await WeatherService.shared.weather(for: location)
             let now = Date()
             let currentWeather = weather.currentWeather
-
-            let startOfCurrentHour = Calendar.current.date(
-                bySetting: .minute,
-                value: 0,
-                of: now
-            ) ?? now
+            let calendar = Calendar(identifier: .gregorian)
+            let startOfCurrentHour = calendar.dateInterval(of: .hour, for: now)?.start ?? now
 
             let hourly = weather.hourlyForecast.forecast
                 .filter { $0.date >= startOfCurrentHour }
@@ -77,6 +86,7 @@ final class WeatherStore: ObservableObject {
                 country: country,
                 latitude: latitude,
                 longitude: longitude,
+                timeZoneIdentifier: resolvedTimeZone,
                 temperature: currentWeather.temperature.converted(to: .celsius).value,
                 apparentTemperature: currentWeather.apparentTemperature.converted(to: .celsius).value,
                 condition: Self.mapCondition(currentWeather.condition),
@@ -94,11 +104,10 @@ final class WeatherStore: ObservableObject {
             )
 
             hasLoadedRealData = true
-            updateFavoriteIfNeeded()
         } catch {
             current = nil
             hasLoadedRealData = false
-            errorMessage = "WeatherKit non è ancora autorizzato per questa app. Attivalo nell’App ID e in Signing & Capabilities, poi reinstalla l’app."
+            errorMessage = "Non è stato possibile caricare i dati meteo reali. Riprova tra qualche secondo."
         }
     }
 
@@ -108,30 +117,77 @@ final class WeatherStore: ObservableObject {
             latitude: request.latitude,
             longitude: request.longitude,
             city: request.city,
-            country: request.country
+            country: request.country,
+            timeZoneIdentifier: request.timeZoneIdentifier
         )
     }
 
-    func addCurrentToFavorites() {
-        guard let current, hasLoadedRealData else { return }
-        guard !favorites.contains(where: {
-            abs($0.latitude - current.latitude) < 0.001 &&
-            abs($0.longitude - current.longitude) < 0.001
-        }) else { return }
-        favorites.append(current)
+    func isSaved(latitude: Double, longitude: Double) -> Bool {
+        savedCities.contains {
+            abs($0.latitude - latitude) < 0.001 &&
+            abs($0.longitude - longitude) < 0.001
+        }
     }
 
-    func removeFavorite(at offsets: IndexSet) {
-        favorites.remove(atOffsets: offsets)
-    }
-
-    private func updateFavoriteIfNeeded() {
+    func saveCurrentCity() {
         guard let current else { return }
-        guard let index = favorites.firstIndex(where: {
-            abs($0.latitude - current.latitude) < 0.001 &&
-            abs($0.longitude - current.longitude) < 0.001
-        }) else { return }
-        favorites[index] = current
+        saveCity(
+            city: current.city,
+            country: current.country,
+            latitude: current.latitude,
+            longitude: current.longitude,
+            timeZoneIdentifier: current.timeZoneIdentifier
+        )
+    }
+
+    func saveCity(
+        city: String,
+        country: String,
+        latitude: Double,
+        longitude: Double,
+        timeZoneIdentifier: String
+    ) {
+        guard !isSaved(latitude: latitude, longitude: longitude) else { return }
+
+        savedCities.append(
+            SavedCity(
+                id: UUID(),
+                city: city,
+                country: country,
+                latitude: latitude,
+                longitude: longitude,
+                timeZoneIdentifier: timeZoneIdentifier
+            )
+        )
+        persistSavedCities()
+    }
+
+    func removeSavedCity(_ city: SavedCity) {
+        savedCities.removeAll { $0.id == city.id }
+        persistSavedCities()
+    }
+
+    private func loadSavedCities() {
+        guard
+            let data = UserDefaults.standard.data(forKey: savedCitiesKey),
+            let decoded = try? JSONDecoder().decode([SavedCity].self, from: data)
+        else { return }
+        savedCities = decoded
+    }
+
+    private func persistSavedCities() {
+        guard let data = try? JSONEncoder().encode(savedCities) else { return }
+        UserDefaults.standard.set(data, forKey: savedCitiesKey)
+    }
+
+    private func resolveTimeZone(latitude: Double, longitude: Double) async -> String {
+        let location = CLLocation(latitude: latitude, longitude: longitude)
+        do {
+            let placemarks = try await CLGeocoder().reverseGeocodeLocation(location)
+            return placemarks.first?.timeZone?.identifier ?? TimeZone.current.identifier
+        } catch {
+            return TimeZone.current.identifier
+        }
     }
 
     private static func localizedSummary(for condition: WeatherCondition) -> String {
@@ -139,23 +195,40 @@ final class WeatherStore: ObservableObject {
         case .clear: return "Cielo sereno e condizioni piacevoli"
         case .partlyCloudy: return "Sole alternato a qualche nuvola"
         case .cloudy: return "Cielo prevalentemente nuvoloso"
-        case .rain: return "Precipitazioni previste nella zona"
-        case .thunderstorm: return "Possibili temporali: presta attenzione"
+        case .rain: return "Pioggia prevista nella zona"
+        case .thunderstorm: return "Possibili temporali nella zona"
         case .snow: return "Possibili nevicate nella zona"
         case .fog: return "Visibilità ridotta per nebbia o foschia"
         case .wind: return "Vento sostenuto nella zona"
+        case .hail: return "Possibili precipitazioni di grandine"
+        case .sleet: return "Possibili precipitazioni miste"
         }
     }
 
     private static func mapCondition(_ condition: WeatherCondition) -> WeatherConditionKind {
-        let text = String(describing: condition).lowercased()
-        if text.contains("thunder") || text.contains("storm") { return .thunderstorm }
-        if text.contains("snow") || text.contains("sleet") || text.contains("blizzard") || text.contains("flurr") { return .snow }
-        if text.contains("rain") || text.contains("drizzle") || text.contains("shower") { return .rain }
-        if text.contains("fog") || text.contains("haze") || text.contains("smok") { return .fog }
-        if text.contains("wind") || text.contains("breez") { return .wind }
-        if text.contains("partly") || text.contains("mostlyclear") || text.contains("mostly clear") { return .partlyCloudy }
-        if text.contains("cloud") || text.contains("overcast") { return .cloudy }
-        return .clear
+        switch condition {
+        case .blizzard, .blowingSnow, .flurries, .heavySnow, .snow, .sunFlurries:
+            return .snow
+        case .drizzle, .freezingDrizzle, .freezingRain, .heavyRain, .rain, .sunShowers:
+            return .rain
+        case .isolatedThunderstorms, .scatteredThunderstorms, .strongStorms, .thunderstorms, .tropicalStorm, .hurricane:
+            return .thunderstorm
+        case .foggy, .haze, .smoky, .blowingDust:
+            return .fog
+        case .breezy, .windy:
+            return .wind
+        case .cloudy, .mostlyCloudy:
+            return .cloudy
+        case .mostlyClear, .partlyCloudy:
+            return .partlyCloudy
+        case .hail:
+            return .hail
+        case .sleet, .wintryMix:
+            return .sleet
+        case .clear, .hot, .frigid:
+            return .clear
+        @unknown default:
+            return .cloudy
+        }
     }
 }

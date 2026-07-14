@@ -20,6 +20,14 @@ struct ContentView: View {
             ZStack {
                 if let weather = store.current {
                     WeatherBackground(condition: weather.condition)
+                    if !weather.isDaytime {
+                        LinearGradient(
+                            colors: [Color.black.opacity(0.42), Color.indigo.opacity(0.30)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        .ignoresSafeArea()
+                    }
                     weatherContent(weather)
                 } else {
                     setupBackground
@@ -239,11 +247,24 @@ struct ContentView: View {
                     Text(weather.country)
                         .font(.caption.weight(.medium))
                         .foregroundStyle(secondary)
+                    Text("Ora locale \(localTime(weather))")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(secondary)
                 }
             }
             .foregroundStyle(primary)
 
             Spacer()
+
+            Button {
+                store.saveCurrentCity()
+            } label: {
+                Image(systemName: store.isSaved(latitude: weather.latitude, longitude: weather.longitude) ? "star.fill" : "star")
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundStyle(store.isSaved(latitude: weather.latitude, longitude: weather.longitude) ? Color.yellow : primary)
+                    .frame(width: 44, height: 44)
+                    .background(.ultraThinMaterial, in: Circle())
+            }
 
             Button { showCities = true } label: {
                 Image(systemName: "globe.europe.africa.fill")
@@ -267,7 +288,7 @@ struct ContentView: View {
     private func hero(_ weather: CityWeather) -> some View {
         VStack(spacing: 13) {
             HStack(alignment: .center, spacing: 15) {
-                Image(systemName: weather.condition.symbol)
+                Image(systemName: weather.condition.symbol(isDaytime: weather.isDaytime))
                     .font(.system(size: 78, weight: .medium))
                     .symbolRenderingMode(.multicolor)
                     .shadow(color: Color.black.opacity(0.14), radius: 18, y: 8)
@@ -308,11 +329,11 @@ struct ContentView: View {
                 HStack(spacing: 11) {
                     ForEach(Array(weather.hourly.prefix(12).enumerated()), id: \.element.id) { index, item in
                         VStack(spacing: 9) {
-                            Text(index == 0 ? "ORA" : hourText(item.date))
+                            Text(index == 0 ? "ORA" : hourText(item.date, timeZone: weather.timeZone))
                                 .font(.caption.weight(.bold))
                                 .foregroundStyle(index == 0 ? primary : secondary)
 
-                            Image(systemName: item.condition.symbol)
+                            Image(systemName: item.condition.symbol(isDaytime: isDaytime(item.date, weather: weather)))
                                 .symbolRenderingMode(.multicolor)
                                 .font(.title2)
 
@@ -391,13 +412,31 @@ struct ContentView: View {
         .padding(.top, 2)
     }
 
-    private func hourText(_ date: Date) -> String {
+    private func hourText(_ date: Date, timeZone: TimeZone) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "it_IT")
         formatter.calendar = Calendar(identifier: .gregorian)
-        formatter.timeZone = .current
+        formatter.timeZone = timeZone
         formatter.dateFormat = "HH:mm"
         return formatter.string(from: date)
+    }
+
+    private func localTime(_ weather: CityWeather) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "it_IT")
+        formatter.timeZone = weather.timeZone
+        formatter.dateFormat = "HH:mm"
+        return formatter.string(from: Date())
+    }
+
+    private func isDaytime(_ date: Date, weather: CityWeather) -> Bool {
+        let calendar = Calendar(identifier: .gregorian)
+        let timeZone = weather.timeZone
+        var localCalendar = calendar
+        localCalendar.timeZone = timeZone
+
+        let hour = localCalendar.component(.hour, from: date)
+        return hour >= 6 && hour < 20
     }
 
     private func uvDescription(_ value: Int) -> String {

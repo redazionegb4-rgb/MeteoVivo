@@ -1,23 +1,94 @@
 import SwiftUI
+import MapKit
 import CoreLocation
+
+struct CityCandidate: Identifiable, Hashable {
+    let id = UUID()
+    let name: String
+    let country: String
+    let subtitle: String
+    let latitude: Double
+    let longitude: Double
+    let timeZoneIdentifier: String
+}
+
+@MainActor
+final class CityLiveSearch: NSObject, ObservableObject, MKLocalSearchCompleterDelegate {
+    @Published var results: [MKLocalSearchCompletion] = []
+    @Published var isSearching = false
+    private let completer = MKLocalSearchCompleter()
+
+    override init() {
+        super.init()
+        completer.delegate = self
+        completer.resultTypes = [.address]
+    }
+
+    func update(_ query: String) {
+        if query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            results = []
+            isSearching = false
+            completer.queryFragment = ""
+            return
+        }
+        isSearching = true
+        completer.queryFragment = query
+    }
+
+    func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
+        results = Array(completer.results.prefix(12))
+        isSearching = false
+    }
+
+    func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: Error) {
+        results = []
+        isSearching = false
+    }
+
+    func resolve(_ completion: MKLocalSearchCompletion) async -> CityCandidate? {
+        let request = MKLocalSearch.Request(completion: completion)
+        do {
+            let response = try await MKLocalSearch(request: request).start()
+            guard let item = response.mapItems.first else { return nil }
+            let placemark = item.placemark
+            let coordinate = placemark.coordinate
+            let name = placemark.locality ?? placemark.name ?? completion.title
+            let country = placemark.country ?? ""
+            let subtitle = [placemark.administrativeArea, placemark.country]
+                .compactMap { $0 }
+                .joined(separator: ", ")
+            let timeZone = placemark.timeZone?.identifier ?? TimeZone.current.identifier
+
+            return CityCandidate(
+                name: name,
+                country: country,
+                subtitle: subtitle,
+                latitude: coordinate.latitude,
+                longitude: coordinate.longitude,
+                timeZoneIdentifier: timeZone
+            )
+        } catch {
+            return nil
+        }
+    }
+}
 
 struct CitiesView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var store: WeatherStore
-
+    @StateObject private var liveSearch = CityLiveSearch()
     @State private var query = ""
-    @State private var results: [CLPlacemark] = []
-    @State private var searching = false
-    @State private var searchError: String?
+    @State private var selectedCandidate: CityCandidate?
+    @State private var resolving = false
 
     var body: some View {
         NavigationStack {
             ZStack {
                 LinearGradient(
                     colors: [
-                        Color(red: 0.15, green: 0.74, blue: 0.98),
-                        Color(red: 0.38, green: 0.45, blue: 0.95),
-                        Color(red: 0.84, green: 0.28, blue: 0.72)
+                        Color(red: 0.07, green: 0.55, blue: 0.96),
+                        Color(red: 0.32, green: 0.32, blue: 0.82),
+                        Color(red: 0.68, green: 0.18, blue: 0.62)
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -25,40 +96,28 @@ struct CitiesView: View {
                 .ignoresSafeArea()
 
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: 20) {
-                        titleCard
-                        searchBar
+                    VStack(spacing: 18) {
+                        introCard
+                        searchField
 
-                        if searching {
-                            ProgressView("Ricerca in corso…")
+                        if resolving || liveSearch.isSearching {
+                            ProgressView("Ricerca città…")
                                 .tint(.white)
                                 .foregroundStyle(.white)
-                                .padding(.top, 6)
+                                .padding(.vertical, 8)
                         }
 
-                        if let searchError {
-                            Text(searchError)
-                                .font(.footnote.weight(.medium))
-                                .foregroundStyle(.white.opacity(0.84))
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal)
-                        }
-
-                        if !results.isEmpty {
-                            resultsSection
-                        }
-
-                        popularSection
-
-                        if !store.favorites.isEmpty {
-                            favoritesSection
+                        if !liveSearch.results.isEmpty {
+                            liveResults
+                        } else if query.isEmpty {
+                            savedSection
                         }
                     }
                     .padding(.horizontal, 18)
                     .padding(.bottom, 36)
                 }
             }
-            .navigationTitle("Altre città")
+            .navigationTitle("Le tue città")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbar {
@@ -67,284 +126,192 @@ struct CitiesView: View {
                         .fontWeight(.bold)
                 }
             }
-            .onSubmit(of: .text) {
-                search()
+            .onChange(of: query) { value in
+                liveSearch.update(value)
             }
         }
     }
 
-    private var titleCard: some View {
-        HStack(spacing: 16) {
+    private var introCard: some View {
+        HStack(spacing: 15) {
             ZStack {
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .fill(Color.white.opacity(0.20))
-                    .frame(width: 66, height: 66)
-
-                Image(systemName: "globe.europe.africa.fill")
-                    .font(.system(size: 30, weight: .semibold))
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(Color.white.opacity(0.18))
+                    .frame(width: 62, height: 62)
+                Image(systemName: "map.fill")
+                    .font(.system(size: 27, weight: .bold))
                     .foregroundStyle(.white)
             }
 
-            VStack(alignment: .leading, spacing: 5) {
-                Text("Scegli un’altra città")
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Cerca e salva città")
                     .font(.title3.bold())
                     .foregroundStyle(.white)
-
-                Text("La posizione attuale rimane nella home. Da qui puoi cercare e aprire altre località.")
+                Text("I risultati compaiono mentre scrivi. Tocca la stella per conservarli.")
                     .font(.subheadline)
                     .foregroundStyle(.white.opacity(0.78))
             }
-
             Spacer()
         }
         .padding(18)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 27, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .stroke(Color.white.opacity(0.35), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 27, style: .continuous)
+                .stroke(Color.white.opacity(0.30), lineWidth: 1)
         )
         .padding(.top, 10)
     }
 
-    private var searchBar: some View {
+    private var searchField: some View {
         HStack(spacing: 12) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 17, weight: .semibold))
                 .foregroundStyle(.secondary)
 
-            TextField("Cerca città o paese", text: $query)
+            TextField("Scrivi una città…", text: $query)
                 .textInputAutocapitalization(.words)
                 .autocorrectionDisabled()
-                .submitLabel(.search)
 
             if !query.isEmpty {
                 Button {
                     query = ""
-                    results = []
-                    searchError = nil
+                    liveSearch.update("")
                 } label: {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundStyle(.secondary)
                 }
             }
-
-            Button("Cerca") {
-                search()
-            }
-            .font(.subheadline.bold())
-            .disabled(query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 14)
+        .padding(.vertical, 15)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 21, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 21, style: .continuous)
-                .stroke(Color.white.opacity(0.50), lineWidth: 1)
-        )
     }
 
-    private var resultsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            sectionTitle("Risultati", symbol: "magnifyingglass")
+    private var liveResults: some View {
+        VStack(alignment: .leading, spacing: 11) {
+            Label("Risultati in tempo reale", systemImage: "bolt.fill")
+                .font(.subheadline.bold())
+                .foregroundStyle(.white)
 
-            VStack(spacing: 10) {
-                ForEach(results, id: \.self) { placemark in
-                    Button {
-                        select(placemark)
-                    } label: {
-                        cityRow(
-                            name: placemark.locality ?? placemark.name ?? "Località",
-                            subtitle: [placemark.administrativeArea, placemark.country]
-                                .compactMap { $0 }
-                                .joined(separator: ", "),
-                            symbol: "mappin.and.ellipse"
-                        )
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-        }
-    }
-
-    private var popularSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            sectionTitle("Città popolari", symbol: "sparkles")
-
-            LazyVGrid(
-                columns: [GridItem(.flexible()), GridItem(.flexible())],
-                spacing: 12
-            ) {
-                quickCity("Roma", "Italia", 41.9028, 12.4964, "building.columns.fill")
-                quickCity("Milano", "Italia", 45.4642, 9.1900, "building.2.fill")
-                quickCity("Napoli", "Italia", 40.8518, 14.2681, "water.waves")
-                quickCity("Palermo", "Italia", 38.1157, 13.3615, "sun.max.fill")
-                quickCity("Torino", "Italia", 45.0703, 7.6869, "mountain.2.fill")
-                quickCity("Firenze", "Italia", 43.7696, 11.2558, "building.columns.fill")
-            }
-        }
-    }
-
-    private var favoritesSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            sectionTitle("Preferite", symbol: "star.fill")
-
-            VStack(spacing: 10) {
-                ForEach(store.favorites) { city in
-                    Button {
-                        Task {
+            ForEach(liveSearch.results, id: \.self) { completion in
+                Button {
+                    resolving = true
+                    Task {
+                        if let candidate = await liveSearch.resolve(completion) {
                             await store.loadWeather(
-                                latitude: city.latitude,
-                                longitude: city.longitude,
-                                city: city.city,
-                                country: city.country
+                                latitude: candidate.latitude,
+                                longitude: candidate.longitude,
+                                city: candidate.name,
+                                country: candidate.country,
+                                timeZoneIdentifier: candidate.timeZoneIdentifier
                             )
                             dismiss()
                         }
-                    } label: {
-                        cityRow(
-                            name: city.city,
-                            subtitle: city.country,
-                            symbol: "star.fill",
-                            trailing: "\(Int(city.temperature.rounded()))°"
-                        )
+                        resolving = false
                     }
-                    .buttonStyle(.plain)
+                } label: {
+                    HStack(spacing: 13) {
+                        Image(systemName: "mappin.circle.fill")
+                            .font(.title2)
+                            .foregroundStyle(.white)
+
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(completion.title)
+                                .font(.headline.bold())
+                                .foregroundStyle(.white)
+                                .multilineTextAlignment(.leading)
+                            Text(completion.subtitle)
+                                .font(.caption)
+                                .foregroundStyle(.white.opacity(0.72))
+                                .multilineTextAlignment(.leading)
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .foregroundStyle(.white.opacity(0.65))
+                    }
+                    .padding(14)
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 21, style: .continuous))
                 }
+                .buttonStyle(.plain)
             }
         }
     }
 
-    private func sectionTitle(_ title: String, symbol: String) -> some View {
-        Label(title, systemImage: symbol)
-            .font(.subheadline.bold())
-            .foregroundStyle(.white)
-    }
-
-    private func quickCity(
-        _ city: String,
-        _ country: String,
-        _ latitude: Double,
-        _ longitude: Double,
-        _ symbol: String
-    ) -> some View {
-        Button {
-            Task {
-                await store.loadWeather(
-                    latitude: latitude,
-                    longitude: longitude,
-                    city: city,
-                    country: country
-                )
-                dismiss()
-            }
-        } label: {
-            VStack(alignment: .leading, spacing: 9) {
-                Image(systemName: symbol)
-                    .font(.title3.bold())
-                    .symbolRenderingMode(.multicolor)
-
-                Text(city)
-                    .font(.headline.bold())
+    private var savedSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Label("Città salvate", systemImage: "star.fill")
+                    .font(.subheadline.bold())
                     .foregroundStyle(.white)
-
-                Text(country)
-                    .font(.caption)
-                    .foregroundStyle(.white.opacity(0.72))
-            }
-            .frame(maxWidth: .infinity, minHeight: 104, alignment: .leading)
-            .padding(16)
-            .background(Color.white.opacity(0.15), in: RoundedRectangle(cornerRadius: 23, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 23, style: .continuous)
-                    .stroke(Color.white.opacity(0.26), lineWidth: 1)
-            )
-        }
-        .buttonStyle(.plain)
-    }
-
-    private func cityRow(
-        name: String,
-        subtitle: String,
-        symbol: String,
-        trailing: String? = nil
-    ) -> some View {
-        HStack(spacing: 14) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color.white.opacity(0.20))
-                    .frame(width: 48, height: 48)
-
-                Image(systemName: symbol)
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundStyle(.white)
+                Spacer()
+                Text("\(store.savedCities.count)")
+                    .font(.caption.bold())
+                    .foregroundStyle(.white.opacity(0.75))
             }
 
-            VStack(alignment: .leading, spacing: 3) {
-                Text(name)
-                    .font(.headline.bold())
-                    .foregroundStyle(.white)
-
-                Text(subtitle)
-                    .font(.caption)
-                    .foregroundStyle(.white.opacity(0.72))
-            }
-
-            Spacer()
-
-            if let trailing {
-                Text(trailing)
-                    .font(.title3.bold())
-                    .foregroundStyle(.white)
+            if store.savedCities.isEmpty {
+                VStack(spacing: 11) {
+                    Image(systemName: "star.circle")
+                        .font(.system(size: 42))
+                        .foregroundStyle(.white.opacity(0.82))
+                    Text("Nessuna città salvata")
+                        .font(.headline.bold())
+                        .foregroundStyle(.white)
+                    Text("Cerca una città, aprila e premi la stella nella home.")
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.72))
+                        .multilineTextAlignment(.center)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 34)
+                .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 25, style: .continuous))
             } else {
-                Image(systemName: "chevron.right")
-                    .foregroundStyle(.white.opacity(0.65))
-            }
-        }
-        .padding(14)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(Color.white.opacity(0.30), lineWidth: 1)
-        )
-    }
+                ForEach(store.savedCities) { city in
+                    HStack(spacing: 12) {
+                        Button {
+                            Task {
+                                await store.loadWeather(
+                                    latitude: city.latitude,
+                                    longitude: city.longitude,
+                                    city: city.city,
+                                    country: city.country,
+                                    timeZoneIdentifier: city.timeZoneIdentifier
+                                )
+                                dismiss()
+                            }
+                        } label: {
+                            HStack(spacing: 13) {
+                                Image(systemName: "location.circle.fill")
+                                    .font(.title2)
+                                    .foregroundStyle(.white)
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(city.city)
+                                        .font(.headline.bold())
+                                        .foregroundStyle(.white)
+                                    Text(city.country)
+                                        .font(.caption)
+                                        .foregroundStyle(.white.opacity(0.72))
+                                }
+                                Spacer()
+                            }
+                        }
+                        .buttonStyle(.plain)
 
-    private func search() {
-        let text = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty else { return }
-
-        searching = true
-        searchError = nil
-        results = []
-
-        CLGeocoder().geocodeAddressString(text) { placemarks, error in
-            DispatchQueue.main.async {
-                searching = false
-
-                if let error {
-                    searchError = "Nessuna città trovata: \(error.localizedDescription)"
-                    return
+                        Button {
+                            store.removeSavedCity(city)
+                        } label: {
+                            Image(systemName: "trash.fill")
+                                .foregroundStyle(.white)
+                                .frame(width: 42, height: 42)
+                                .background(Color.red.opacity(0.32), in: Circle())
+                        }
+                    }
+                    .padding(14)
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 21, style: .continuous))
                 }
-
-                results = placemarks ?? []
-
-                if results.isEmpty {
-                    searchError = "Nessun risultato trovato."
-                }
             }
-        }
-    }
-
-    private func select(_ placemark: CLPlacemark) {
-        guard let location = placemark.location else { return }
-
-        Task {
-            await store.loadWeather(
-                latitude: location.coordinate.latitude,
-                longitude: location.coordinate.longitude,
-                city: placemark.locality ?? placemark.name ?? query,
-                country: placemark.country ?? ""
-            )
-            dismiss()
         }
     }
 }
