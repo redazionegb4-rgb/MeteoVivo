@@ -5,16 +5,20 @@ import WeatherKit
 
 @MainActor
 final class WeatherStore: ObservableObject {
-    @Published var current: CityWeather = .demo()
+    @Published var current: CityWeather?
     @Published var favorites: [CityWeather] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var hasLoadedRealData = false
+    @Published var lastRequestedLocation: (latitude: Double, longitude: Double, city: String, country: String)?
     @AppStorage("appTheme") private var appThemeRaw = AppTheme.automatic.rawValue
 
     var theme: AppTheme {
         get { AppTheme(rawValue: appThemeRaw) ?? .automatic }
-        set { appThemeRaw = newValue.rawValue; objectWillChange.send() }
+        set {
+            appThemeRaw = newValue.rawValue
+            objectWillChange.send()
+        }
     }
 
     var preferredColorScheme: ColorScheme? {
@@ -26,6 +30,7 @@ final class WeatherStore: ObservableObject {
     }
 
     func loadWeather(latitude: Double, longitude: Double, city: String, country: String) async {
+        lastRequestedLocation = (latitude, longitude, city, country)
         isLoading = true
         errorMessage = nil
         defer { isLoading = false }
@@ -82,16 +87,24 @@ final class WeatherStore: ObservableObject {
             hasLoadedRealData = true
             updateFavoriteIfNeeded()
         } catch {
+            current = nil
             hasLoadedRealData = false
-            errorMessage = """
-            Impossibile caricare i dati reali. Controlla che WeatherKit sia attivo \
-            nell’App ID e in Signing & Capabilities, poi riprova.
-            """
+            errorMessage = "WeatherKit non è ancora autorizzato per questa app. Attivalo nell’App ID e in Signing & Capabilities, poi reinstalla l’app."
         }
     }
 
+    func retryLastRequest() async {
+        guard let request = lastRequestedLocation else { return }
+        await loadWeather(
+            latitude: request.latitude,
+            longitude: request.longitude,
+            city: request.city,
+            country: request.country
+        )
+    }
+
     func addCurrentToFavorites() {
-        guard hasLoadedRealData else { return }
+        guard let current, hasLoadedRealData else { return }
         guard !favorites.contains(where: {
             abs($0.latitude - current.latitude) < 0.001 &&
             abs($0.longitude - current.longitude) < 0.001
@@ -104,6 +117,7 @@ final class WeatherStore: ObservableObject {
     }
 
     private func updateFavoriteIfNeeded() {
+        guard let current else { return }
         guard let index = favorites.firstIndex(where: {
             abs($0.latitude - current.latitude) < 0.001 &&
             abs($0.longitude - current.longitude) < 0.001
