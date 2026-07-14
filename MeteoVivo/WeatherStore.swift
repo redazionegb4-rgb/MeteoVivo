@@ -41,15 +41,24 @@ final class WeatherStore: ObservableObject {
             let now = Date()
             let currentWeather = weather.currentWeather
 
-            let hourly = weather.hourlyForecast.forecast.prefix(24).map {
-                HourlyForecast(
-                    id: UUID(),
-                    date: $0.date,
-                    temperature: $0.temperature.converted(to: .celsius).value,
-                    precipitationChance: $0.precipitationChance,
-                    condition: Self.mapCondition($0.condition)
-                )
-            }
+            let startOfCurrentHour = Calendar.current.date(
+                bySetting: .minute,
+                value: 0,
+                of: now
+            ) ?? now
+
+            let hourly = weather.hourlyForecast.forecast
+                .filter { $0.date >= startOfCurrentHour }
+                .prefix(24)
+                .map {
+                    HourlyForecast(
+                        id: UUID(),
+                        date: $0.date,
+                        temperature: $0.temperature.converted(to: .celsius).value,
+                        precipitationChance: $0.precipitationChance,
+                        condition: Self.mapCondition($0.condition)
+                    )
+                }
 
             let daily = weather.dailyForecast.forecast.prefix(10).map {
                 DailyForecast(

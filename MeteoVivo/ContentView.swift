@@ -225,31 +225,33 @@ struct ContentView: View {
 
     private func header(_ weather: CityWeather) -> some View {
         HStack(spacing: 12) {
-            Button { showCities = true } label: {
-                HStack(spacing: 10) {
-                    ZStack {
-                        Circle().fill(.ultraThinMaterial)
-                        Image(systemName: "location.fill")
-                            .font(.system(size: 15, weight: .bold))
-                    }
-                    .frame(width: 40, height: 40)
+            HStack(spacing: 10) {
+                ZStack {
+                    Circle().fill(.ultraThinMaterial)
+                    Image(systemName: "location.fill")
+                        .font(.system(size: 15, weight: .bold))
+                }
+                .frame(width: 40, height: 40)
 
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(weather.city)
-                            .font(.system(size: 18, weight: .bold, design: .rounded))
-                        Text(weather.country)
-                            .font(.caption.weight(.medium))
-                            .foregroundStyle(secondary)
-                    }
-
-                    Image(systemName: "chevron.down")
-                        .font(.caption.bold())
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(weather.city)
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                    Text(weather.country)
+                        .font(.caption.weight(.medium))
                         .foregroundStyle(secondary)
                 }
-                .foregroundStyle(primary)
             }
+            .foregroundStyle(primary)
 
             Spacer()
+
+            Button { showCities = true } label: {
+                Image(systemName: "globe.europe.africa.fill")
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundStyle(primary)
+                    .frame(width: 44, height: 44)
+                    .background(.ultraThinMaterial, in: Circle())
+            }
 
             Button { showSettings = true } label: {
                 Image(systemName: "slider.horizontal.3")
@@ -306,7 +308,7 @@ struct ContentView: View {
                 HStack(spacing: 11) {
                     ForEach(Array(weather.hourly.prefix(12).enumerated()), id: \.element.id) { index, item in
                         VStack(spacing: 9) {
-                            Text(index == 0 ? "Ora" : item.date.formatted(.dateTime.hour()))
+                            Text(index == 0 ? "ORA" : hourText(item.date))
                                 .font(.caption.weight(.bold))
                                 .foregroundStyle(index == 0 ? primary : secondary)
 
@@ -387,6 +389,15 @@ struct ContentView: View {
         }
         .foregroundStyle(secondary)
         .padding(.top, 2)
+    }
+
+    private func hourText(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "it_IT")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.timeZone = .current
+        formatter.dateFormat = "HH:mm"
+        return formatter.string(from: date)
     }
 
     private func uvDescription(_ value: Int) -> String {
