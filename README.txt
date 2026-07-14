@@ -1,21 +1,15 @@
-METEO VIVO — BUILD 12
+METEO VIVO — BUILD 13
 
-ANIMAZIONI METEO
-- Sole: bagliore pulsante, raggi rotanti e scintille.
-- Nuvole: livelli di nuvole in movimento.
-- Pioggia: gocce animate continue.
-- Temporale: pioggia, lampi e fulmine.
-- Neve: fiocchi con movimento e rotazione.
-- Grandine: chicchi animati.
-- Nevischio: pioggia e neve combinate.
-- Nebbia: banchi di foschia in movimento.
-- Vento: raffiche animate e foglie.
-- Grafica compatibile con modalità chiara e scura.
-- Build tecnica 12, non mostrata nell'app.
+CORREZIONE
+- Suddivise le animazioni meteo in viste SwiftUI separate.
+- Risolti gli errori “compiler is unable to type-check this expression”.
+- Mantenute animazioni per sole, nuvole, pioggia, temporali, neve,
+  grandine, nevischio, nebbia e vento.
+- Build tecnica 13, non mostrata nell'app.
 
-INSTALLAZIONE
-1. Elimina la vecchia cartella del progetto.
+PASSAGGI
+1. Elimina la cartella della build precedente.
 2. Apri questa build.
 3. Product > Clean Build Folder.
-4. Avvia prima sull'iPhone per controllare le animazioni.
+4. Prova sull'iPhone.
 5. Poi esegui Product > Archive.
