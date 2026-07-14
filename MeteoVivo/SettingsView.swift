@@ -14,18 +14,24 @@ struct SettingsView: View {
                         }
                     }
                 }
+
                 Section("Dati meteo") {
                     LabeledContent("Fonte", value: store.useLiveWeather ? "Apple WeatherKit" : "Dati dimostrativi")
-                    Text("Dopo aver attivato WeatherKit nell'account Apple Developer e nella sezione Signing & Capabilities, l'app userà automaticamente i dati reali.")
-                        .font(.footnote).foregroundStyle(.secondary)
+                    Text("Dopo aver attivato WeatherKit nell’account Apple Developer e in Signing & Capabilities, l’app utilizzerà automaticamente i dati reali.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                 }
+
                 Section("Informazioni") {
                     LabeledContent("Versione", value: "1.0")
-                    LabeledContent("Build", value: "1")
                 }
             }
             .navigationTitle("Impostazioni")
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Fine") { dismiss() } } }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Fine") { dismiss() }
+                }
+            }
         }
     }
 }

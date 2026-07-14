@@ -2,116 +2,162 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject private var store: WeatherStore
+    @Environment(\.colorScheme) private var colorScheme
     @StateObject private var locationManager = LocationManager()
     @State private var showCities = false
     @State private var showSettings = false
+
+    private var primary: Color { colorScheme == .dark ? .white : Color(red: 0.06, green: 0.13, blue: 0.24) }
+    private var secondary: Color { primary.opacity(0.68) }
+    private var cardFill: Color { colorScheme == .dark ? Color.white.opacity(0.10) : Color.white.opacity(0.78) }
+    private var border: Color { colorScheme == .dark ? Color.white.opacity(0.13) : Color.white.opacity(0.85) }
 
     var body: some View {
         NavigationStack {
             ZStack {
                 WeatherBackground(condition: store.current.condition)
+
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 18) {
                         header
-                        currentWeather
+                        hero
                         hourlyForecast
                         detailsGrid
                         dailyForecast
                         updateFooter
                     }
-                    .padding(.horizontal, 18)
-                    .padding(.bottom, 30)
+                    .padding(.horizontal, 17)
+                    .padding(.bottom, 34)
                 }
-                .refreshable {
-                    await refreshCurrent()
-                }
+                .refreshable { await refreshCurrent() }
             }
             .toolbar(.hidden, for: .navigationBar)
             .sheet(isPresented: $showCities) { CitiesView() }
             .sheet(isPresented: $showSettings) { SettingsView() }
             .task {
-                if locationManager.authorizationStatus == .authorizedWhenInUse || locationManager.authorizationStatus == .authorizedAlways {
+                if locationManager.authorizationStatus == .authorizedWhenInUse ||
+                    locationManager.authorizationStatus == .authorizedAlways {
                     locationManager.requestPermissionAndLocation()
                 }
             }
             .onChange(of: locationManager.location) { location in
                 guard let location else { return }
                 Task {
-                    await store.loadWeather(latitude: location.coordinate.latitude,
-                                            longitude: location.coordinate.longitude,
-                                            city: locationManager.cityName ?? "Posizione attuale",
-                                            country: locationManager.countryName ?? "")
+                    await store.loadWeather(
+                        latitude: location.coordinate.latitude,
+                        longitude: location.coordinate.longitude,
+                        city: locationManager.cityName ?? "Posizione attuale",
+                        country: locationManager.countryName ?? ""
+                    )
                 }
             }
         }
     }
 
     private var header: some View {
-        HStack {
+        HStack(spacing: 12) {
             Button { showCities = true } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "location.fill")
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(store.current.city).font(.headline)
-                        Text(store.current.country).font(.caption).opacity(0.8)
+                HStack(spacing: 10) {
+                    ZStack {
+                        Circle().fill(cardFill)
+                        Image(systemName: "location.fill")
+                            .font(.system(size: 15, weight: .bold))
                     }
-                    Image(systemName: "chevron.down").font(.caption2)
+                    .frame(width: 38, height: 38)
+
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(store.current.city)
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                        Text(store.current.country)
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(secondary)
+                    }
+
+                    Image(systemName: "chevron.down")
+                        .font(.caption.bold())
+                        .foregroundStyle(secondary)
                 }
-                .foregroundStyle(.white)
+                .foregroundStyle(primary)
             }
+
             Spacer()
+
             Button { showSettings = true } label: {
-                Image(systemName: "gearshape.fill")
-                    .font(.title3)
-                    .foregroundStyle(.white)
+                Image(systemName: "slider.horizontal.3")
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundStyle(primary)
                     .frame(width: 42, height: 42)
-                    .background(.ultraThinMaterial, in: Circle())
+                    .background(cardFill, in: Circle())
+                    .overlay(Circle().stroke(border, lineWidth: 1))
             }
         }
         .padding(.top, 10)
     }
 
-    private var currentWeather: some View {
-        VStack(spacing: 8) {
-            Image(systemName: store.current.condition.symbol)
-                .font(.system(size: 70))
-                .symbolRenderingMode(.multicolor)
-                .shadow(radius: 10)
-            Text("\(Int(store.current.temperature.rounded()))°")
-                .font(.system(size: 92, weight: .thin, design: .rounded))
-            Text(store.current.condition.title)
-                .font(.title2.bold())
+    private var hero: some View {
+        VStack(spacing: 13) {
+            HStack(alignment: .center, spacing: 15) {
+                Image(systemName: store.current.condition.symbol)
+                    .font(.system(size: 78, weight: .medium))
+                    .symbolRenderingMode(.multicolor)
+                    .shadow(color: Color.black.opacity(0.12), radius: 18, y: 8)
+
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("\(Int(store.current.temperature.rounded()))°")
+                        .font(.system(size: 86, weight: .semibold, design: .rounded))
+                        .minimumScaleFactor(0.75)
+                    Text(store.current.condition.title)
+                        .font(.title3.bold())
+                }
+            }
+
             Text(store.current.summary)
-                .font(.subheadline)
+                .font(.subheadline.weight(.medium))
                 .multilineTextAlignment(.center)
-                .opacity(0.88)
-            Text("Percepita \(Int(store.current.apparentTemperature.rounded()))°")
-                .font(.subheadline.weight(.semibold))
-                .padding(.horizontal, 14).padding(.vertical, 7)
-                .background(.ultraThinMaterial, in: Capsule())
+                .foregroundStyle(secondary)
+                .padding(.horizontal, 10)
+
+            HStack(spacing: 8) {
+                Label("Percepita \(Int(store.current.apparentTemperature.rounded()))°", systemImage: "thermometer.medium")
+                Label("Max \(Int(store.current.daily.first?.high ?? store.current.temperature))°", systemImage: "arrow.up")
+                Label("Min \(Int(store.current.daily.first?.low ?? store.current.temperature))°", systemImage: "arrow.down")
+            }
+            .font(.caption.weight(.bold))
+            .foregroundStyle(primary)
+            .padding(.horizontal, 13)
+            .padding(.vertical, 9)
+            .background(cardFill, in: Capsule())
+            .overlay(Capsule().stroke(border, lineWidth: 1))
         }
-        .foregroundStyle(.white)
-        .padding(.vertical, 6)
+        .foregroundStyle(primary)
+        .padding(.vertical, 8)
     }
 
     private var hourlyForecast: some View {
-        WeatherCard(title: "PROSSIME ORE", symbol: "clock.fill") {
+        WeatherCard(title: "Prossime ore", symbol: "clock.fill", fill: cardFill, border: border, primary: primary, secondary: secondary) {
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 20) {
-                    ForEach(store.current.hourly) { item in
+                HStack(spacing: 11) {
+                    ForEach(Array(store.current.hourly.prefix(12).enumerated()), id: \.element.id) { index, item in
                         VStack(spacing: 9) {
-                            Text(item.date, format: .dateTime.hour().minute())
-                                .font(.caption.weight(.semibold))
+                            Text(index == 0 ? "Ora" : item.date.formatted(.dateTime.hour()))
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(index == 0 ? primary : secondary)
+
                             Image(systemName: item.condition.symbol)
                                 .symbolRenderingMode(.multicolor)
                                 .font(.title2)
-                            Text("\(Int(item.temperature.rounded()))°").font(.headline)
-                            if item.precipitationChance > 0.15 {
-                                Text("\(Int(item.precipitationChance * 100))%")
-                                    .font(.caption2).foregroundStyle(.cyan)
-                            }
+
+                            Text("\(Int(item.temperature.rounded()))°")
+                                .font(.headline.bold())
+
+                            Text(item.precipitationChance > 0.12 ? "\(Int(item.precipitationChance * 100))%" : " ")
+                                .font(.caption2.bold())
+                                .foregroundStyle(Color.blue)
                         }
-                        .frame(width: 52)
+                        .frame(width: 58)
+                        .padding(.vertical, 10)
+                        .background(index == 0 ? primary.opacity(colorScheme == .dark ? 0.12 : 0.07) : Color.clear,
+                                    in: RoundedRectangle(cornerRadius: 17, style: .continuous))
                     }
                 }
             }
@@ -119,54 +165,77 @@ struct ContentView: View {
     }
 
     private var detailsGrid: some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 14) {
-            DetailTile(title: "UMIDITÀ", value: "\(Int(store.current.humidity * 100))%", symbol: "humidity.fill", subtitle: "Livello attuale")
-            DetailTile(title: "VENTO", value: "\(Int(store.current.windSpeed)) km/h", symbol: "wind", subtitle: "Velocità")
-            DetailTile(title: "INDICE UV", value: "\(store.current.uvIndex)", symbol: "sun.max.fill", subtitle: uvDescription)
-            DetailTile(title: "PRESSIONE", value: "\(Int(store.current.pressure)) hPa", symbol: "gauge.with.dots.needle.50percent", subtitle: "Pressione atmosferica")
-            DetailTile(title: "VISIBILITÀ", value: "\(Int(store.current.visibility)) km", symbol: "eye.fill", subtitle: "Distanza stimata")
-            DetailTile(title: "SOLE", value: store.current.sunset.formatted(date: .omitted, time: .shortened), symbol: "sunset.fill", subtitle: "Alba \(store.current.sunrise.formatted(date: .omitted, time: .shortened))")
+        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+            DetailTile(title: "Umidità", value: "\(Int(store.current.humidity * 100))%", symbol: "humidity.fill", subtitle: "Livello attuale", fill: cardFill, border: border, primary: primary, secondary: secondary)
+            DetailTile(title: "Vento", value: "\(Int(store.current.windSpeed)) km/h", symbol: "wind", subtitle: "Velocità", fill: cardFill, border: border, primary: primary, secondary: secondary)
+            DetailTile(title: "Indice UV", value: "\(store.current.uvIndex)", symbol: "sun.max.fill", subtitle: uvDescription, fill: cardFill, border: border, primary: primary, secondary: secondary)
+            DetailTile(title: "Pressione", value: "\(Int(store.current.pressure)) hPa", symbol: "gauge.with.dots.needle.50percent", subtitle: "Atmosferica", fill: cardFill, border: border, primary: primary, secondary: secondary)
+            DetailTile(title: "Visibilità", value: "\(Int(store.current.visibility)) km", symbol: "eye.fill", subtitle: "Distanza stimata", fill: cardFill, border: border, primary: primary, secondary: secondary)
+            DetailTile(title: "Tramonto", value: store.current.sunset.formatted(date: .omitted, time: .shortened), symbol: "sunset.fill", subtitle: "Alba \(store.current.sunrise.formatted(date: .omitted, time: .shortened))", fill: cardFill, border: border, primary: primary, secondary: secondary)
         }
     }
 
     private var dailyForecast: some View {
-        WeatherCard(title: "PREVISIONI 10 GIORNI", symbol: "calendar") {
+        WeatherCard(title: "Previsioni 10 giorni", symbol: "calendar", fill: cardFill, border: border, primary: primary, secondary: secondary) {
             VStack(spacing: 0) {
                 ForEach(Array(store.current.daily.enumerated()), id: \.element.id) { index, item in
-                    HStack {
+                    HStack(spacing: 9) {
                         Text(index == 0 ? "Oggi" : item.date.formatted(.dateTime.weekday(.wide)))
-                            .frame(width: 90, alignment: .leading)
+                            .font(.subheadline.weight(index == 0 ? .bold : .semibold))
+                            .frame(width: 93, alignment: .leading)
+
                         Image(systemName: item.condition.symbol)
                             .symbolRenderingMode(.multicolor)
-                            .frame(width: 34)
-                        if item.precipitationChance > 0.15 {
-                            Text("\(Int(item.precipitationChance * 100))%")
-                                .font(.caption).foregroundStyle(.cyan)
-                                .frame(width: 40)
-                        } else { Spacer().frame(width: 40) }
+                            .font(.title3)
+                            .frame(width: 32)
+
+                        Text(item.precipitationChance > 0.12 ? "\(Int(item.precipitationChance * 100))%" : "")
+                            .font(.caption.bold())
+                            .foregroundStyle(Color.blue)
+                            .frame(width: 38)
+
                         Spacer()
-                        Text("\(Int(item.low))°").opacity(0.65)
-                        Capsule().fill(.white.opacity(0.35)).frame(width: 46, height: 4)
-                        Text("\(Int(item.high))°").fontWeight(.semibold)
+
+                        Text("\(Int(item.low))°")
+                            .foregroundStyle(secondary)
+
+                        ZStack(alignment: .leading) {
+                            Capsule().fill(primary.opacity(0.10))
+                            Capsule()
+                                .fill(LinearGradient(colors: [.cyan, .yellow, .orange], startPoint: .leading, endPoint: .trailing))
+                                .frame(width: 30)
+                        }
+                        .frame(width: 50, height: 5)
+
+                        Text("\(Int(item.high))°")
+                            .fontWeight(.bold)
                     }
-                    .padding(.vertical, 11)
-                    if index < store.current.daily.count - 1 { Divider().overlay(.white.opacity(0.16)) }
+                    .foregroundStyle(primary)
+                    .padding(.vertical, 12)
+
+                    if index < store.current.daily.count - 1 {
+                        Divider().overlay(primary.opacity(0.09))
+                    }
                 }
             }
         }
     }
 
     private var updateFooter: some View {
-        VStack(spacing: 6) {
-            Text(store.useLiveWeather ? "Dati WeatherKit" : "Modalità dimostrativa")
-                .font(.caption.weight(.semibold))
-            Text("Aggiornato \(store.current.lastUpdated.formatted(date: .omitted, time: .shortened))")
+        VStack(spacing: 5) {
+            Text(store.useLiveWeather ? "Dati Apple WeatherKit" : "Modalità dimostrativa")
+                .font(.caption.weight(.bold))
+            Text("Aggiornato alle \(store.current.lastUpdated.formatted(date: .omitted, time: .shortened))")
                 .font(.caption2)
             if let message = store.errorMessage {
-                Text(message).font(.caption2).multilineTextAlignment(.center).padding(.top, 4)
+                Text(message)
+                    .font(.caption2)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 3)
             }
         }
-        .foregroundStyle(.white.opacity(0.8))
+        .foregroundStyle(secondary)
+        .padding(.top, 2)
     }
 
     private var uvDescription: String {
@@ -180,26 +249,36 @@ struct ContentView: View {
     }
 
     private func refreshCurrent() async {
-        await store.loadWeather(latitude: store.current.latitude, longitude: store.current.longitude,
-                                city: store.current.city, country: store.current.country)
+        await store.loadWeather(
+            latitude: store.current.latitude,
+            longitude: store.current.longitude,
+            city: store.current.city,
+            country: store.current.country
+        )
     }
 }
 
 struct WeatherCard<Content: View>: View {
     let title: String
     let symbol: String
+    let fill: Color
+    let border: Color
+    let primary: Color
+    let secondary: Color
     @ViewBuilder let content: Content
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 13) {
             Label(title, systemImage: symbol)
-                .font(.caption.bold()).foregroundStyle(.white.opacity(0.72))
+                .font(.caption.bold())
+                .foregroundStyle(secondary)
             content
         }
-        .foregroundStyle(.white)
+        .foregroundStyle(primary)
         .padding(16)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 24).stroke(.white.opacity(0.12)))
+        .background(fill, in: RoundedRectangle(cornerRadius: 25, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 25, style: .continuous).stroke(border, lineWidth: 1))
+        .shadow(color: Color.black.opacity(0.07), radius: 18, y: 9)
     }
 }
 
@@ -208,16 +287,38 @@ struct DetailTile: View {
     let value: String
     let symbol: String
     let subtitle: String
+    let fill: Color
+    let border: Color
+    let primary: Color
+    let secondary: Color
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Label(title, systemImage: symbol).font(.caption.bold()).opacity(0.75)
-            Text(value).font(.title2.bold())
-            Text(subtitle).font(.caption).opacity(0.72).lineLimit(2)
+        VStack(alignment: .leading, spacing: 9) {
+            HStack {
+                Image(systemName: symbol)
+                    .font(.system(size: 17, weight: .bold))
+                    .symbolRenderingMode(.multicolor)
+                Spacer()
+            }
+
+            Text(title.uppercased())
+                .font(.caption2.bold())
+                .foregroundStyle(secondary)
+
+            Text(value)
+                .font(.system(size: 21, weight: .bold, design: .rounded))
+                .foregroundStyle(primary)
+                .minimumScaleFactor(0.75)
+
+            Text(subtitle)
+                .font(.caption)
+                .foregroundStyle(secondary)
+                .lineLimit(2)
         }
-        .foregroundStyle(.white)
-        .frame(maxWidth: .infinity, minHeight: 112, alignment: .topLeading)
+        .frame(maxWidth: .infinity, minHeight: 122, alignment: .topLeading)
         .padding(15)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 22))
-        .overlay(RoundedRectangle(cornerRadius: 22).stroke(.white.opacity(0.12)))
+        .background(fill, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(border, lineWidth: 1))
+        .shadow(color: Color.black.opacity(0.06), radius: 14, y: 7)
     }
 }
