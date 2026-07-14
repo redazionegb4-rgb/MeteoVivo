@@ -270,7 +270,7 @@ struct ContentView: View {
             } label: {
                 Image(systemName: store.isSaved(latitude: weather.latitude, longitude: weather.longitude) ? "star.fill" : "star")
                     .font(.system(size: 17, weight: .bold))
-                    .foregroundStyle(store.isSaved(latitude: weather.latitude, longitude: weather.longitude) ? Color.yellow : primary)
+                    .foregroundStyle(store.isSaved(latitude: weather.latitude, longitude: weather.longitude) ? Color.yellow : primaryColor(for: weather))
                     .frame(width: 44, height: 44)
                     .background(.ultraThinMaterial, in: Circle())
             }
@@ -345,7 +345,7 @@ struct ContentView: View {
                         VStack(spacing: 9) {
                             Text(index == 0 ? "ORA" : hourText(item.date, timeZone: weather.timeZone))
                                 .font(.caption.weight(.bold))
-                                .foregroundStyle(index == 0 ? primary : secondary)
+                                .foregroundStyle(index == 0 ? primaryColor(for: weather) : secondaryColor(for: weather))
 
                             Image(systemName: item.condition.symbol(isDaytime: isDaytime(item.date, weather: weather)))
                                 .symbolRenderingMode(.multicolor)
@@ -408,7 +408,7 @@ struct ContentView: View {
                     .padding(.vertical, 12)
 
                     if index < weather.daily.count - 1 {
-                        Divider().overlay(primary.opacity(0.09))
+                        Divider().overlay(primaryColor(for: weather).opacity(0.09))
                     }
                 }
             }
