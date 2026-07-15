@@ -10,6 +10,10 @@ final class WeatherStore: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var hasLoadedRealData = false
+    @Published var appleWeatherMarkLightURL: URL?
+    @Published var appleWeatherMarkDarkURL: URL?
+    @Published var appleWeatherLegalURL: URL?
+    @Published var appleWeatherServiceName = "Apple Weather"
     @Published var lastRequestedLocation: (latitude: Double, longitude: Double, city: String, country: String, timeZoneIdentifier: String)?
 
     @AppStorage("appTheme") private var appThemeRaw = AppTheme.automatic.rawValue
@@ -17,6 +21,10 @@ final class WeatherStore: ObservableObject {
 
     init() {
         loadSavedCities()
+
+        Task {
+            await loadWeatherAttribution()
+        }
     }
 
     var theme: AppTheme {
@@ -32,6 +40,18 @@ final class WeatherStore: ObservableObject {
         case .automatic: return nil
         case .light: return .light
         case .dark: return .dark
+        }
+    }
+
+    func loadWeatherAttribution() async {
+        do {
+            let attribution = try await WeatherService.shared.attribution
+            appleWeatherMarkLightURL = attribution.combinedMarkLightURL
+            appleWeatherMarkDarkURL = attribution.combinedMarkDarkURL
+            appleWeatherLegalURL = attribution.legalPageURL
+            appleWeatherServiceName = attribution.serviceName
+        } catch {
+            // Retry when the weather data loads.
         }
     }
 
@@ -116,6 +136,12 @@ final class WeatherStore: ObservableObject {
             )
 
             hasLoadedRealData = true
+
+            if appleWeatherLegalURL == nil ||
+                appleWeatherMarkLightURL == nil ||
+                appleWeatherMarkDarkURL == nil {
+                await loadWeatherAttribution()
+            }
         } catch {
             current = nil
             hasLoadedRealData = false

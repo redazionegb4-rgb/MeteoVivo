@@ -1,17 +1,19 @@
-METEO VIVO — BUILD 19
+METEO VIVO — BUILD 20
 
-MODIFICHE
-- Eliminata la scritta “Sole in movimento”, “Pioggia animata”, ecc.
-- Le animazioni restano nello sfondo senza testi inutili.
-- Header semplificato: posizione personale, città, altre città e impostazioni.
-- Rimossa la stella dalla barra superiore.
-- Nome città su una sola riga, con riduzione automatica per nomi lunghi.
-- Paese e ora locale riuniti in una riga compatta.
-- Salvataggio città spostato sotto il meteo con un pulsante testuale discreto.
-- Build tecnica 19, non mostrata nell'app.
+CORREZIONE RICHIESTA DA APP REVIEW 5.2.5
+- Inserito il marchio ufficiale Apple Weather fornito dinamicamente da WeatherKit.
+- Inserito il collegamento legale ufficiale alle fonti dei dati.
+- Attribuzione visibile nella Home e in Impostazioni > Dati meteorologici.
+- Rimossi i testi tecnici rivolti allo sviluppatore.
+- Build tecnica 20, non mostrata nell'app.
 
-PASSAGGI
-1. Elimina la cartella della build precedente.
-2. Apri questa build.
-3. Product > Clean Build Folder.
-4. Installa sull'iPhone e verifica l'header.
+PRIMA DELL'INVIO
+1. Elimina la vecchia cartella e apri questa build.
+2. Product > Clean Build Folder.
+3. Installa su un iPhone reale.
+4. Registra lo schermo mostrando:
+   - Home con dati meteo reali;
+   - fondo Home con marchio Apple Weather e link alle fonti;
+   - Impostazioni > Dati meteorologici;
+   - apertura del link legale.
+5. Carica il video e inserisci il link nelle Note per la revisione.

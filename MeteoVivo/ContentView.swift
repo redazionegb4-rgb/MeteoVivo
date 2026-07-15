@@ -213,6 +213,10 @@ struct ContentView: View {
                 hourlyForecast(weather)
                 detailsGrid(weather)
                 dailyForecast(weather)
+
+                AppleWeatherAttributionView(compact: true)
+                    .padding(.top, 4)
+
                 updateFooter(weather)
             }
             .padding(.horizontal, 17)

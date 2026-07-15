@@ -88,13 +88,9 @@ struct SettingsView: View {
     }
 
     private var weatherCard: some View {
-        settingsCard(title: "Dati meteo", symbol: "cloud.sun.fill") {
-            VStack(spacing: 14) {
-                infoRow(
-                    title: "Fonte",
-                    value: store.hasLoadedRealData ? "Apple WeatherKit" : "Da configurare",
-                    symbol: "server.rack"
-                )
+        settingsCard(title: "Dati meteorologici", symbol: "cloud.sun.fill") {
+            VStack(spacing: 16) {
+                AppleWeatherAttributionView()
 
                 Divider()
 
@@ -104,7 +100,7 @@ struct SettingsView: View {
                     symbol: "arrow.clockwise"
                 )
 
-                Text("L’app mostra esclusivamente dati meteo reali. Per funzionare, WeatherKit deve essere attivo nel tuo App ID e nella sezione Signing & Capabilities di Xcode.")
+                Text("Le previsioni e le condizioni visualizzate nell’app sono fornite dal servizio indicato sopra. Tocca il collegamento per consultare le fonti legali dei dati.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
