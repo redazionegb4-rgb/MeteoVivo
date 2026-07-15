@@ -100,7 +100,7 @@ struct SettingsView: View {
                     symbol: "arrow.clockwise"
                 )
 
-                Text("Le previsioni e le condizioni visualizzate nell’app sono fornite dal servizio indicato sopra. Tocca il collegamento per consultare le fonti legali dei dati.")
+                Text("Le condizioni e le previsioni visualizzate nell’app provengono dal servizio meteorologico indicato sopra.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -214,5 +214,85 @@ struct SettingsView: View {
         case .dark:
             return LinearGradient(colors: [.indigo, .black], startPoint: .topLeading, endPoint: .bottomTrailing)
         }
+    }
+}
+
+
+private struct AppleWeatherAttributionView: View {
+    @EnvironmentObject private var store: WeatherStore
+    @Environment(\.colorScheme) private var colorScheme
+
+    var compact: Bool = false
+
+    private var selectedMarkURL: URL? {
+        colorScheme == .dark
+            ? store.weatherMarkDarkURL
+            : store.weatherMarkLightURL
+    }
+
+    var body: some View {
+        VStack(spacing: compact ? 7 : 11) {
+            mark
+
+            if let legalURL = store.weatherLegalURL {
+                Link(destination: legalURL) {
+                    HStack(spacing: 6) {
+                        Text("Fonti legali dei dati meteo")
+                        Image(systemName: "arrow.up.right")
+                            .font(.caption2.bold())
+                    }
+                    .font(
+                        compact
+                            ? .caption2.weight(.semibold)
+                            : .caption.weight(.semibold)
+                    )
+                }
+            } else {
+                Text("Fonti legali dei dati meteo")
+                    .font(compact ? .caption2 : .caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .task {
+            if store.weatherLegalURL == nil {
+                await store.loadWeatherAttribution()
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var mark: some View {
+        if let url = selectedMarkURL {
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .empty:
+                    ProgressView()
+                case .success(let image):
+                    image
+                        .resizable()
+                        .scaledToFit()
+                case .failure:
+                    fallbackMark
+                @unknown default:
+                    fallbackMark
+                }
+            }
+            .frame(height: compact ? 22 : 30)
+        } else {
+            fallbackMark
+        }
+    }
+
+    private var fallbackMark: some View {
+        Text(" Weather")
+            .font(
+                .system(
+                    size: compact ? 16 : 20,
+                    weight: .semibold
+                )
+            )
+            .foregroundStyle(.primary)
+            .accessibilityLabel("Apple Weather")
     }
 }
