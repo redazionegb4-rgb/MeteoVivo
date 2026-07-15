@@ -49,7 +49,7 @@ final class WeatherStore: ObservableObject {
             weatherMarkDarkURL = attribution.combinedMarkDarkURL
             weatherLegalURL = attribution.legalPageURL
         } catch {
-            // L'attribuzione verrà richiesta nuovamente al prossimo caricamento.
+            // Verrà riprovato al caricamento successivo.
         }
     }
 

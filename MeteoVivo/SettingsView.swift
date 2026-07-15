@@ -100,7 +100,7 @@ struct SettingsView: View {
                     symbol: "arrow.clockwise"
                 )
 
-                Text("Le condizioni e le previsioni visualizzate nell’app provengono dal servizio meteorologico indicato sopra.")
+                Text("Le condizioni e le previsioni visualizzate nell’app sono fornite da Apple Weather. Tocca il collegamento per consultare le fonti legali dei dati.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -218,7 +218,7 @@ struct SettingsView: View {
 }
 
 
-private struct AppleWeatherAttributionView: View {
+struct AppleWeatherAttributionView: View {
     @EnvironmentObject private var store: WeatherStore
     @Environment(\.colorScheme) private var colorScheme
 
@@ -232,7 +232,7 @@ private struct AppleWeatherAttributionView: View {
 
     var body: some View {
         VStack(spacing: compact ? 7 : 11) {
-            mark
+            attributionMark
 
             if let legalURL = store.weatherLegalURL {
                 Link(destination: legalURL) {
@@ -247,6 +247,7 @@ private struct AppleWeatherAttributionView: View {
                             : .caption.weight(.semibold)
                     )
                 }
+                .accessibilityLabel("Fonti legali dei dati meteo Apple Weather")
             } else {
                 Text("Fonti legali dei dati meteo")
                     .font(compact ? .caption2 : .caption)
@@ -262,9 +263,9 @@ private struct AppleWeatherAttributionView: View {
     }
 
     @ViewBuilder
-    private var mark: some View {
-        if let url = selectedMarkURL {
-            AsyncImage(url: url) { phase in
+    private var attributionMark: some View {
+        if let selectedMarkURL {
+            AsyncImage(url: selectedMarkURL) { phase in
                 switch phase {
                 case .empty:
                     ProgressView()
