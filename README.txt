@@ -1,15 +1,16 @@
-METEO VIVO — BUILD 55
+METEO VIVO — VERSIONE 1.1, BUILD 56
 
-Base utilizzata: MeteoVivo-22-2.zip, la build indicata come corretta, funzionante e già firmata.
+Base utilizzata: MeteoVivo-22-2.zip, la build indicata come corretta e funzionante.
 
-Aggiornamenti:
-- caricamento automatico della posizione all'apertura;
-- attribuzione ufficiale Apple Weather;
-- collegamento legale ufficiale;
-- attribuzione visibile in Home e Impostazioni;
-- dichiarazione crittografia standard;
-- impostazioni originali di firma, Team, Bundle ID e App Store conservate;
-- nessun nuovo file o riferimento aggiunto al progetto Xcode;
-- project.pbxproj modificato soltanto nel numero build 55.
+Modifiche applicate:
+- Versione app aggiornata da 1.0 a 1.1.
+- Numero build aggiornato a 56.
+- Posizione corrente caricata automaticamente all'apertura.
+- Attribuzione ufficiale Apple Weather.
+- Collegamento legale ufficiale alle fonti meteo.
+- Attribuzione visibile nella Home e nelle Impostazioni.
+- Firma, Team, Bundle ID, capability e configurazione Xcode Cloud della base originale conservati.
+- Nessuna modifica alle impostazioni Archive/Release.
+- Nessun nuovo file aggiunto manualmente al progetto Xcode.
 
-Sovrascrivi completamente i file presenti su Git con quelli di questa cartella.
+Sovrascrivi completamente i file presenti nella repository Git con quelli contenuti in questa cartella.
