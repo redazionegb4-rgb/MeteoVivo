@@ -53,10 +53,7 @@ struct ContentView: View {
             }
             .onChange(of: locationManager.location) { location in
                 guard let location else { return }
-
                 Task {
-                    try? await Task.sleep(nanoseconds: 350_000_000)
-
                     await store.loadWeather(
                         latitude: location.coordinate.latitude,
                         longitude: location.coordinate.longitude,

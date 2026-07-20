@@ -1,17 +1,15 @@
-METEO VIVO — BUILD 54 VERIFICATA
+METEO VIVO — BUILD 55
 
-Partenza: MeteoVivo-22-4 caricato dall'utente.
+Base utilizzata: MeteoVivo-22-2.zip, la build indicata come corretta, funzionante e già firmata.
 
-Correzioni:
-- Numero build interno 54.
-- SKIP_INSTALL = NO per l'archivio App Store.
-- Versioning Apple Generic.
-- User Script Sandboxing attivo.
-- Dichiarazione crittografia presente.
-- WeatherKit, attribuzione Apple Weather e link legale mantenuti.
-- Posizione automatica mantenuta.
-- Icone App Store verificate.
-- Rimossi __MACOSX, .DS_Store e file resource fork.
-- Struttura project.pbxproj controllata senza aggiungere nuovi file o riferimenti.
+Aggiornamenti:
+- caricamento automatico della posizione all'apertura;
+- attribuzione ufficiale Apple Weather;
+- collegamento legale ufficiale;
+- attribuzione visibile in Home e Impostazioni;
+- dichiarazione crittografia standard;
+- impostazioni originali di firma, Team, Bundle ID e App Store conservate;
+- nessun nuovo file o riferimento aggiunto al progetto Xcode;
+- project.pbxproj modificato soltanto nel numero build 55.
 
-Sostituisci completamente la repository con questa cartella e avvia una nuova build Xcode Cloud.
+Sovrascrivi completamente i file presenti su Git con quelli di questa cartella.
