@@ -1,11 +1,17 @@
-METEO VIVO — BUILD 52
+METEO VIVO — BUILD 54 VERIFICATA
 
-CORREZIONE APP STORE CONNECT
-- Il precedente progetto aveva CURRENT_PROJECT_VERSION = 23.
-- Su App Store Connect era già stata inviata la build 44.
-- La nuova build usa CFBundleVersion 52, quindi è superiore alla build già inviata.
-- Aggiunta dichiarazione ITSAppUsesNonExemptEncryption = NO.
-- Rimossi .DS_Store, __MACOSX e file Finder non necessari.
-- Conservate posizione automatica e attribuzione Apple Weather.
+Partenza: MeteoVivo-22-4 caricato dall'utente.
 
-Sostituisci completamente i file su GitHub con questa build e avvia una nuova compilazione Xcode Cloud.
+Correzioni:
+- Numero build interno 54.
+- SKIP_INSTALL = NO per l'archivio App Store.
+- Versioning Apple Generic.
+- User Script Sandboxing attivo.
+- Dichiarazione crittografia presente.
+- WeatherKit, attribuzione Apple Weather e link legale mantenuti.
+- Posizione automatica mantenuta.
+- Icone App Store verificate.
+- Rimossi __MACOSX, .DS_Store e file resource fork.
+- Struttura project.pbxproj controllata senza aggiungere nuovi file o riferimenti.
+
+Sostituisci completamente la repository con questa cartella e avvia una nuova build Xcode Cloud.
