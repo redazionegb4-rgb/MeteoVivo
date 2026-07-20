@@ -1,9 +1,11 @@
-METEO VIVO — BUILD 23
+METEO VIVO — BUILD 52
 
-- La posizione attuale viene caricata automaticamente all'apertura.
-- Se il permesso è già concesso, non serve premere il pulsante.
-- Dopo il primo consenso, l'app richiede subito la posizione.
-- Il pulsante posizione resta disponibile per aggiornare manualmente.
-- Build tecnica 23, non mostrata nell'app.
+CORREZIONE APP STORE CONNECT
+- Il precedente progetto aveva CURRENT_PROJECT_VERSION = 23.
+- Su App Store Connect era già stata inviata la build 44.
+- La nuova build usa CFBundleVersion 52, quindi è superiore alla build già inviata.
+- Aggiunta dichiarazione ITSAppUsesNonExemptEncryption = NO.
+- Rimossi .DS_Store, __MACOSX e file Finder non necessari.
+- Conservate posizione automatica e attribuzione Apple Weather.
 
-Prima del test elimina la vecchia app dall'iPhone, fai Product > Clean Build Folder e reinstalla.
+Sostituisci completamente i file su GitHub con questa build e avvia una nuova compilazione Xcode Cloud.
