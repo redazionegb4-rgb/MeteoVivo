@@ -41,16 +41,35 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let location = locations.last else { return }
-        self.location = location
-        CLGeocoder().reverseGeocodeLocation(location) { [weak self] placemarks, error in
+        guard let newLocation = locations.last else { return }
+
+        CLGeocoder().reverseGeocodeLocation(
+            newLocation,
+            preferredLocale: Locale(identifier: "it_IT")
+        ) { [weak self] placemarks, error in
             DispatchQueue.main.async {
-                if let error = error {
-                    self?.errorMessage = error.localizedDescription
-                    return
+                guard let self else { return }
+
+                if let placemark = placemarks?.first {
+                    self.cityName =
+                        placemark.locality ??
+                        placemark.subAdministrativeArea ??
+                        placemark.administrativeArea ??
+                        "Posizione attuale"
+
+                    self.countryName =
+                        placemark.country ??
+                        placemark.isoCountryCode ??
+                        ""
+                } else {
+                    self.cityName = "Posizione attuale"
+                    self.countryName = ""
+                    self.errorMessage = error?.localizedDescription
                 }
-                self?.cityName = placemarks?.first?.locality ?? placemarks?.first?.administrativeArea
-                self?.countryName = placemarks?.first?.country
+
+                // Pubblica la posizione soltanto dopo aver ricavato città e Paese.
+                // ContentView riceve quindi il nome corretto già al primo avvio.
+                self.location = newLocation
             }
         }
     }
