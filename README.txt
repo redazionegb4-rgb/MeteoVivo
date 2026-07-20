@@ -1,18 +1,9 @@
-METEO VIVO — BUILD 22 CORRETTA
+METEO VIVO — BUILD 23
 
-Partenza: progetto MeteoVivo-22 caricato dall'utente e già funzionante.
+- La posizione attuale viene caricata automaticamente all'apertura.
+- Se il permesso è già concesso, non serve premere il pulsante.
+- Dopo il primo consenso, l'app richiede subito la posizione.
+- Il pulsante posizione resta disponibile per aggiornare manualmente.
+- Build tecnica 23, non mostrata nell'app.
 
-Correzioni:
-- Marchio ufficiale Apple Weather ottenuto tramite WeatherKit.
-- Link legale ufficiale alle fonti meteorologiche.
-- Attribuzione visibile nella Home.
-- Attribuzione visibile in Impostazioni > Dati meteorologici.
-- AppleWeatherAttributionView non è privata, quindi è accessibile da ContentView.
-- Nessun nuovo file inserito nel progetto Xcode.
-- project.pbxproj invariato salvo il numero build 22.
-
-Prima dell'invio:
-1. Product > Clean Build Folder.
-2. Installa su iPhone fisico.
-3. Registra Home, attribuzione in fondo alla Home, Impostazioni e apertura del link legale.
-4. Inserisci il link del video nelle Note per la revisione.
+Prima del test elimina la vecchia app dall'iPhone, fai Product > Clean Build Folder e reinstalla.

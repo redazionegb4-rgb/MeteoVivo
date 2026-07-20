@@ -29,8 +29,14 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         authorizationStatus = manager.authorizationStatus
-        if authorizationStatus == .authorizedWhenInUse || authorizationStatus == .authorizedAlways {
+
+        switch manager.authorizationStatus {
+        case .authorizedWhenInUse, .authorizedAlways:
             manager.requestLocation()
+        case .notDetermined, .denied, .restricted:
+            break
+        @unknown default:
+            break
         }
     }
 
@@ -51,5 +57,19 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         errorMessage = error.localizedDescription
+    }
+
+
+    func requestInitialLocation() {
+        switch authorizationStatus {
+        case .authorizedWhenInUse, .authorizedAlways:
+            manager.requestLocation()
+        case .notDetermined:
+            manager.requestWhenInUseAuthorization()
+        case .denied, .restricted:
+            break
+        @unknown default:
+            break
+        }
     }
 }

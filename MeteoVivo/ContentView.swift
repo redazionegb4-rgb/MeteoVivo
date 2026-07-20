@@ -39,12 +39,10 @@ struct ContentView: View {
             .sheet(isPresented: $showCities) { CitiesView() }
             .sheet(isPresented: $showSettings) { SettingsView() }
             .task {
-                if locationManager.authorizationStatus == .authorizedWhenInUse ||
-                    locationManager.authorizationStatus == .authorizedAlways {
-                    locationManager.requestPermissionAndLocation()
-                } else if locationManager.authorizationStatus == .notDetermined {
-                    locationManager.requestPermissionAndLocation()
-                } else {
+                locationManager.requestInitialLocation()
+
+                if locationManager.authorizationStatus == .denied ||
+                    locationManager.authorizationStatus == .restricted {
                     await store.loadWeather(
                         latitude: 41.9028,
                         longitude: 12.4964,
@@ -55,7 +53,10 @@ struct ContentView: View {
             }
             .onChange(of: locationManager.location) { location in
                 guard let location else { return }
+
                 Task {
+                    try? await Task.sleep(nanoseconds: 350_000_000)
+
                     await store.loadWeather(
                         latitude: location.coordinate.latitude,
                         longitude: location.coordinate.longitude,
